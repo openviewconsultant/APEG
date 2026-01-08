@@ -1,0 +1,118 @@
+# Xcode
+#
+# gitignore contributors: codeigniter, tyilo, adrianmo, jotbe
+
+## Build results
+build/
+DerivedData/
+
+## Skeleton project files
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.playground.xcworkspace
+
+## Android Studio
+.idea/
+.gradle/
+build/
+captures/
+*.apk
+*.iml
+local.properties
+
+## CocoaPods
+#
+# It is not recommended to store the pods repo in your project repository.
+# However, if you do choose to do so, uncomment the following line.
+# Pods/
+
+## Carthage
+#
+# Add this line if you want to avoid checking in your Carthage dependencies.
+# Carthage/Build
+
+## AccuRev
+.accurev.session
+
+## Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/gc_keys.json
+
+## AppCode
+.idea/
+
+## GNU Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+## jEdit
+*~
+
+## JetBrains
+.idea/
+*.iml
+*.iws
+
+## MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+## Vim
+[._]*.s[a-v][a-z]
+[._]sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+*~
+tags
+
+## Visual Studio Code
+.vscode/
+
+## SVN
+.svn/
+
+## git
+.git/
