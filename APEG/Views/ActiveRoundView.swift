@@ -1,10 +1,49 @@
 import SwiftUI
+import CoreLocation
 
 struct ActiveRoundView: View {
     let course: GolfCourse
     @Environment(\.dismiss) var dismiss
+    @StateObject private var locationManager = LocationManager()
     @State private var currentHole = 1
     @State private var scores: [Int: Int] = [:]
+    
+    // Generate dummy hole coordinates relative to course center
+    // In a real app, this would come from a database API
+    private var holeCoordinates: [CLLocationCoordinate2D] {
+        (0..<18).map { i in
+            // Spiral pattern or random offsets to simulate different hole locations
+            let offsetLat = Double(i) * 0.002 * (i % 2 == 0 ? 1 : -1)
+            let offsetLon = Double(i) * 0.002 * (i % 3 == 0 ? 1 : -1)
+            return CLLocationCoordinate2D(
+                latitude: course.coordinate.latitude + offsetLat,
+                longitude: course.coordinate.longitude + offsetLon
+            )
+        }
+    }
+    
+    private var currentHoleLocation: CLLocationCoordinate2D {
+        if currentHole <= holeCoordinates.count {
+            return holeCoordinates[currentHole - 1]
+        }
+        return course.coordinate
+    }
+    
+    private var distances: (center: String, back: String, front: String) {
+        guard let userLoc = locationManager.location else {
+            return ("--", "--", "--")
+        }
+        
+        let holeLoc = CLLocation(latitude: currentHoleLocation.latitude, longitude: currentHoleLocation.longitude)
+        let distanceInMeters = userLoc.distance(from: holeLoc)
+        let yards = Int(distanceInMeters * 1.09361)
+        
+        return (
+            "\(yards)",
+            "\(yards + 15)", // Simulated Back (usually +10-20 yards)
+            "\(max(0, yards - 15))" // Simulated Front
+        )
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -25,6 +64,12 @@ struct ActiveRoundView: View {
                     Text("En Juego")
                         .font(.system(size: 14))
                         .fontWeight(.bold)
+                    
+                    if !locationManager.isAuthorized {
+                        Text("Activar GPS en Ajustes")
+                            .font(.caption2)
+                            .foregroundColor(.red)
+                    }
                 }
                 Spacer()
                 Button("Terminar") { dismiss() }
@@ -49,7 +94,7 @@ struct ActiveRoundView: View {
                                     .foregroundColor(.white.opacity(0.8))
                             }
                             Spacer()
-                            Text("385 yd")
+                            Text("\(distances.center) yd")
                                 .font(.system(size: 20))
                                 .fontWeight(.bold)
                         }
@@ -63,15 +108,15 @@ struct ActiveRoundView: View {
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                                     .foregroundColor(.white.opacity(0.7))
-                                Text("164")
+                                Text(distances.center)
                                     .font(.system(size: 72))
                                     .fontWeight(.black)
                                     .italic()
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 12) {
-                                GPSDistItem(label: "ATRÁS", value: "178")
-                                GPSDistItem(label: "FRENTE", value: "152")
+                                GPSDistItem(label: "ATRÁS", value: distances.back)
+                                GPSDistItem(label: "FRENTE", value: distances.front)
                             }
                         }
                     }
@@ -204,5 +249,5 @@ struct ScoreButton: View {
 }
 
 #Preview {
-    ActiveRoundView(course: GolfCourse(name: "Country Club de Bogotá", location: "Bogotá", distance: "0km", rating: "5.0", imageName: ""))
+    ActiveRoundView(course: GolfCourse(name: "Country Club de Bogotá", location: "Bogotá", distance: "0km", rating: "5.0", imageName: "", latitude: 4.707, longitude: -74.04))
 }

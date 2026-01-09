@@ -4,13 +4,14 @@ struct ProfileView: View {
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = true
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Header / Profile Info
-                VStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(LinearGradient(colors: [Theme.primary, Theme.primary.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Header / Profile Info
+                    VStack(spacing: 16) {
+                        ZStack {
+                            Circle()
+                                .fill(LinearGradient(colors: [Theme.primary, Theme.primary.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
                             .frame(width: 100, height: 100)
                         
                         Text("AB")
@@ -45,7 +46,13 @@ struct ProfileView: View {
                     }
                     
                     ProfileMenuSection(title: "Cuenta") {
-                        ProfileMenuRow(icon: "person", title: "Datos Personales", color: .gray)
+                         NavigationLink(destination: PersonalDataView()) {
+                             ProfileMenuRowContent(icon: "person", title: "Datos Personales", color: .gray)
+                         }
+                         Divider()
+                             .padding(.leading, 68)
+                             .opacity(0.5)
+
                         ProfileMenuRow(icon: "creditcard", title: "Métodos de Pago", color: .purple)
                         ProfileMenuRow(icon: "bell", title: "Notificaciones", color: .red)
                     }
@@ -71,7 +78,9 @@ struct ProfileView: View {
             }
             .padding(.bottom, 120) // Space for tab bar
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+            .background(Color(hex: "F8F9FA").ignoresSafeArea())
+            .navigationBarHidden(true)
+        }
     }
 }
 
@@ -129,7 +138,21 @@ struct ProfileMenuRow: View {
     
     var body: some View {
         Button(action: {}) {
-            HStack(spacing: 16) {
+            ProfileMenuRowContent(icon: icon, title: title, color: color)
+        }
+        Divider()
+            .padding(.leading, 68)
+            .opacity(0.5)
+    }
+}
+
+struct ProfileMenuRowContent: View {
+    let icon: String
+    let title: String
+    let color: Color
+    
+    var body: some View {
+        HStack(spacing: 16) {
                 ZStack {
                     Circle()
                         .fill(color.opacity(0.1))
@@ -151,10 +174,6 @@ struct ProfileMenuRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-        }
-        Divider()
-            .padding(.leading, 68)
-            .opacity(0.5)
     }
 }
 

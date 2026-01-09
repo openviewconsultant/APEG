@@ -45,7 +45,7 @@ struct HomeView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
-                            TipCard(title: "Swing Tempo", time: "3 min", iconName: "golfball", color: Theme.primary)
+                            TipCard(title: "Swing Tempo", time: "3 min", iconName: "circle.hexagongrid.fill", color: Theme.primary)
                             TipCard(title: "Mental Game", time: "5 min", iconName: "brain.head.profile", color: .orange)
                         }
                         .padding(.horizontal)
@@ -176,7 +176,7 @@ struct HomeView: View {
                 tag: "Oferta Especial",
                 title: "TaylorMade\nStealth 2",
                 price: "$599",
-                imageName: "golfball",
+                imageName: "circle.hexagongrid.fill",
                 color: Color(hex: "1A1A1A")
             )
             .padding(.horizontal)

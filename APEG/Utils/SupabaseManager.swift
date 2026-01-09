@@ -9,6 +9,16 @@ class SupabaseManager {
     
     private init() {}
     
+    var accessToken: String? {
+        get { UserDefaults.standard.string(forKey: "supabaseAccessToken") }
+        set { UserDefaults.standard.set(newValue, forKey: "supabaseAccessToken") }
+    }
+    
+    var currentUserId: String? {
+        get { UserDefaults.standard.string(forKey: "supabaseUserId") }
+        set { UserDefaults.standard.set(newValue, forKey: "supabaseUserId") }
+    }
+    
     enum SupabaseError: Error {
         case invalidURL
         case networkError(String)
@@ -102,7 +112,19 @@ class SupabaseManager {
             }
             
             if (200...299).contains(httpResponse.statusCode) {
-                completion(.success(true))
+                if let data = data,
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let accessToken = json["access_token"] as? String,
+                   let user = json["user"] as? [String: Any],
+                   let userId = user["id"] as? String {
+                    
+                    self.accessToken = accessToken
+                    self.currentUserId = userId
+                    completion(.success(true))
+                } else {
+                    // Fallback if structure is different, though this is standard Supabase
+                    completion(.success(true))
+                }
             } else {
                 if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                     let message = json["error_description"] as? String ?? json["msg"] as? String ?? "Unknown error"
@@ -120,7 +142,9 @@ class SupabaseManager {
             return
         }
         
-        let fileName = "\(userId)/cedula.jpg"
+        // Use a generic name or keep using cedula.jpg. Ideally should be unique per upload if history matters.
+        let fileName = "\(userId)/cedula_\(Int(Date().timeIntervalSince1970)).jpg"
+        
         guard let url = URL(string: "\(supabaseURL)/storage/v1/object/id-documents/\(fileName)") else {
             completion(.failure(.invalidURL))
             return
@@ -129,7 +153,12 @@ class SupabaseManager {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization") // Note: In a real app, use the actual user session token
+        // Use the token if we have it, otherwise fallback to anon (though RLS might block anon)
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        }
         request.addValue("image/jpeg", forHTTPHeaderField: "Content-Type")
         request.httpBody = imageData
         
@@ -138,8 +167,56 @@ class SupabaseManager {
                 completion(.failure(.networkError(error.localizedDescription)))
                 return
             }
-            // Even if storage fails, we already have the user created
             completion(.success(fileName))
+        }.resume()
+    }
+    
+    func fetchProfile(completion: @escaping (Result<UserProfile, SupabaseError>) -> Void) {
+        guard let userId = currentUserId, let token = accessToken else {
+            completion(.failure(.authError("No active session")))
+            return
+        }
+        
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/profiles?id=eq.\(userId)&select=*") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                // Supabase standard format for timestamp is ISO8601
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00" // Adjust as needed for specific Postgres format
+                // Often JSONDecoder can handle ISO8601 automatically if we don't custom format, but sometimes Postgres returns slightly different strings.
+                // For now, let's stick to the default string decoding in the model or standard strategy.
+                // Our model has Strings for simplicity.
+                
+                let profiles = try decoder.decode([UserProfile].self, from: data)
+                if let profile = profiles.first {
+                    completion(.success(profile))
+                } else {
+                    completion(.failure(.networkError("Profile not found")))
+                }
+            } catch {
+                print("Decoding error: \(error)")
+                completion(.failure(.decodingError))
+            }
         }.resume()
     }
 }

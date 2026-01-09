@@ -14,7 +14,7 @@ struct ProductCard: View {
                     .frame(height: 160)
                     .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
                     .overlay(
-                        Image(systemName: "golfball")
+                        Image(systemName: "circle.hexagongrid.fill")
                             .font(.system(size: 40))
                             .foregroundColor(Theme.primary.opacity(0.3))
                     )
@@ -489,7 +489,7 @@ struct PlayActionCard: View {
                     Circle()
                         .fill(Theme.primary.opacity(0.1))
                         .frame(width: 54, height: 54)
-                    Image(systemName: "golfball")
+                    Image(systemName: "circle.hexagongrid.fill")
                         .foregroundColor(Theme.primary)
                         .font(.title2)
                 }
