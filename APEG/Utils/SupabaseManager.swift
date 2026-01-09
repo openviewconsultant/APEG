@@ -306,4 +306,158 @@ class SupabaseManager {
             }
         }.resume()
     }
+
+    // MARK: - Rounds & Scores
+    
+    func saveRound(userId: String, courseName: String, scores: [Int: Int], completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/rounds") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        }
+        
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("representation", forHTTPHeaderField: "Prefer") // To maintain consistency, though we need the ID back
+        request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+        
+        let totalScore = scores.values.reduce(0, +)
+        
+        let body: [String: Any] = [
+            "user_id": userId,
+            "course_name": courseName,
+            "total_score": totalScore,
+            "status": "completed",
+            "date_played": ISO8601DateFormatter().string(from: Date())
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+                  let roundId = json.first?["id"] as? String else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            // Now save individual scores
+            self.saveScores(roundId: roundId, scores: scores, completion: completion)
+            
+        }.resume()
+    }
+    
+    private func saveScores(roundId: String, scores: [Int: Int], completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/round_scores") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let scoreObjects = scores.map { (hole, score) -> [String: Any] in
+            return [
+                "round_id": roundId,
+                "hole_number": hole,
+                "score": score,
+                "par": 4 // Simplified, ideally gets par from course data
+            ]
+        }
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: scoreObjects)
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                completion(.failure(.networkError("Failed to save scores")))
+            }
+        }.resume()
+    }
+    
+    // MARK: - Products
+    
+    func fetchProducts(completion: @escaping (Result<[Product], SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/products?select=*") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+           request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+           request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                // Handle Supabase timestamp format
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00"
+                decoder.dateDecodingStrategy = .custom { decoder in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    
+                    // Fallback for different fractional seconds
+                    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss+00:00"
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+                }
+                
+                let products = try decoder.decode([Product].self, from: data)
+                completion(.success(products))
+            } catch {
+                print("Decoding products error: \(error)")
+                completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
 }

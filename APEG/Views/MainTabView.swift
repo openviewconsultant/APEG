@@ -91,6 +91,7 @@ struct MainTabView: View {
         }) {
             ZStack {
                 Circle()
+                // Use a dynamic color or keep white
                     .fill(Color.white)
                     .frame(width: 58, height: 58)
                     .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 4)
@@ -119,47 +120,6 @@ struct MainTabView: View {
             }
             .frame(width: 44, height: 44)
         }
-    }
-}
-
-// Temporary ShopView if not moved to separate file yet
-struct ShopView: View {
-    let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
-    
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                HStack {
-                    Text("Tienda Pro")
-                        .font(.custom("Outfit-Bold", size: 34))
-                    Spacer()
-                    Button(action: {}) {
-                        Image(systemName: "cart")
-                            .font(.title3)
-                            .foregroundColor(.black)
-                            .padding(10)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    }
-                }
-                .padding(.horizontal)
-                
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ProductCard(title: "Titleist Pro V1", price: 54.99, imageName: "balls", brand: "Titleist")
-                    ProductCard(title: "Stealth 2 Driver", price: 599.99, imageName: "driver", brand: "TaylorMade")
-                    ProductCard(title: "FootJoy Traditions", price: 129.99, imageName: "shoes", brand: "FootJoy")
-                    ProductCard(title: "Approach S62", price: 499.99, imageName: "watch", brand: "Garmin")
-                }
-                .padding(.horizontal)
-            }
-            .padding(.vertical)
-            .padding(.top, 50)
-        }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
     }
 }
 

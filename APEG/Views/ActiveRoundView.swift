@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreLocation
+import MapKit
 
 struct ActiveRoundView: View {
     let course: GolfCourse
@@ -7,12 +8,19 @@ struct ActiveRoundView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var currentHole = 1
     @State private var scores: [Int: Int] = [:]
+    @State private var isSaving = false
+    
+    // Alert state
+    @State private var showAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+    
+    // Camera position for MapKit
+    @State private var position: MapCameraPosition = .automatic
     
     // Generate dummy hole coordinates relative to course center
-    // In a real app, this would come from a database API
     private var holeCoordinates: [CLLocationCoordinate2D] {
         (0..<18).map { i in
-            // Spiral pattern or random offsets to simulate different hole locations
             let offsetLat = Double(i) * 0.002 * (i % 2 == 0 ? 1 : -1)
             let offsetLon = Double(i) * 0.002 * (i % 3 == 0 ? 1 : -1)
             return CLLocationCoordinate2D(
@@ -40,155 +48,328 @@ struct ActiveRoundView: View {
         
         return (
             "\(yards)",
-            "\(yards + 15)", // Simulated Back (usually +10-20 yards)
-            "\(max(0, yards - 15))" // Simulated Front
+            "\(yards + 15)",
+            "\(max(0, yards - 15))"
         )
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Updated Header
             HStack {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "xmark")
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                    Circle()
+                        .fill(Color.gray.opacity(0.1))
+                        .frame(width: 40, height: 40)
+                        .overlay(Image(systemName: "xmark").foregroundColor(.primary))
                 }
                 Spacer()
-                VStack(spacing: 2) {
+                VStack(spacing: 4) {
                     Text(course.name.uppercased())
-                        .font(.system(size: 10))
-                        .fontWeight(.bold)
+                        .font(.system(size: 11, weight: .bold))
+                        .tracking(1)
                         .foregroundColor(Theme.primary)
-                    Text("En Juego")
-                        .font(.system(size: 14))
-                        .fontWeight(.bold)
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(Color.green)
+                            .frame(width: 8, height: 8)
+                            .shadow(color: .green.opacity(0.5), radius: 4)
+                        Text("En Juego")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
                     
                     if !locationManager.isAuthorized {
                         Text("Activar GPS en Ajustes")
                             .font(.caption2)
                             .foregroundColor(.red)
+                            .padding(.top, 2)
                     }
                 }
                 Spacer()
-                Button("Terminar") { dismiss() }
-                    .font(.system(size: 14))
-                    .fontWeight(.bold)
-                    .foregroundColor(Theme.primary)
+                
+                if isSaving {
+                    ProgressView()
+                } else {
+                    Button(action: finishRound) {
+                        Text("Terminar")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(Theme.primary)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Theme.primary.opacity(0.1))
+                            .cornerRadius(20)
+                    }
+                }
             }
             .padding()
             .background(Color.white)
+            .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
+            .zIndex(10)
             
             ScrollView {
                 VStack(spacing: 24) {
-                    // Hole Info & GPS Card
-                    VStack(spacing: 20) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("HOYO \(currentHole)")
-                                    .font(.system(size: 14))
-                                    .fontWeight(.black)
-                                Text("Par 4 • Hcp 5")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.white.opacity(0.8))
-                            }
-                            Spacer()
-                            Text("\(distances.center) yd")
-                                .font(.system(size: 20))
-                                .fontWeight(.bold)
+                    
+                    // Compact GPS Card
+                    ZStack {
+                        // Background Gradient
+                        LinearGradient(
+                            colors: [Theme.primary, Color(hex: "2E8B57")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        
+                        // Decorative Circles
+                        GeometryReader { proxy in
+                            Circle()
+                                .stroke(Color.white.opacity(0.1), lineWidth: 30)
+                                .frame(width: 200, height: 200)
+                                .offset(x: -50, y: -50)
                         }
                         
-                        Divider().background(Color.white.opacity(0.3))
-                        
-                        // GPS Distance Display
-                        HStack(alignment: .bottom) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("AL CENTRO")
-                                    .font(.system(size: 10))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white.opacity(0.7))
-                                Text(distances.center)
-                                    .font(.system(size: 72))
-                                    .fontWeight(.black)
-                                    .italic()
+                        HStack(spacing: 0) {
+                            // Left Side: Info & Main Distance
+                            VStack(alignment: .leading, spacing: 12) {
+                                // Header
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                                        Text("HOYO")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.8))
+                                        Text("\(currentHole)")
+                                            .font(.system(size: 28, weight: .black))
+                                            .foregroundColor(.white)
+                                    }
+                                    Text("Par 4 • Hcp 5")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(Color.black.opacity(0.2))
+                                        .cornerRadius(6)
+                                }
+                                
+                                Spacer()
+                                
+                                // Main Distance
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Text("AL CENTRO")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .tracking(1)
+                                        .foregroundColor(Color.white.opacity(0.7))
+                                    
+                                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                                        Text(distances.center)
+                                            .font(.system(size: 56, weight: .heavy))
+                                            .foregroundColor(.white)
+                                        Text("yd")
+                                            .font(.system(size: 20, weight: .semibold))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                }
                             }
+                            .padding(24)
+                            
                             Spacer()
-                            VStack(alignment: .trailing, spacing: 12) {
-                                GPSDistItem(label: "ATRÁS", value: distances.back)
-                                GPSDistItem(label: "FRENTE", value: distances.front)
+                            
+                            // Right Side: Mini Map & Other Distances
+                            VStack(spacing: 16) {
+                                // Mini Map (Drawing / Standard Style)
+                                Map(position: $position) {
+                                    Marker("", coordinate: currentHoleLocation)
+                                        .tint(.green)
+                                }
+                                .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+                                .frame(width: 90, height: 90)
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: .black.opacity(0.2), radius: 5)
+                                .onAppear { updateMapRegion() }
+                                .onChange(of: currentHole) {
+                                    updateMapRegion()
+                                }
+                                
+                                // Back/Front
+                                VStack(spacing: 8) {
+                                    GPSDistItem(label: "ATRÁS", value: distances.back)
+                                    GPSDistItem(label: "FRENTE", value: distances.front)
+                                }
                             }
+                            .padding(20)
                         }
                     }
-                    .padding(24)
-                    .background(Theme.primary)
-                    .foregroundColor(.white)
-                    .cornerRadius(32)
-                    .shadow(color: Theme.primary.opacity(0.3), radius: 15, x: 0, y: 10)
+                    .frame(height: 240) // Reduced height from 380
+                    .mask(RoundedRectangle(cornerRadius: 32))
+                    .shadow(color: Theme.primary.opacity(0.4), radius: 15, x: 0, y: 8)
                     .padding(.horizontal)
                     
                     // Score Input Section
-                    VStack(spacing: 20) {
+                    VStack(spacing: 16) {
                         Text("REGISTRAR SCORE")
-                            .font(.system(size: 12))
-                            .fontWeight(.bold)
+                            .font(.system(size: 12, weight: .bold))
+                            .tracking(1.5)
                             .foregroundColor(.secondary)
                         
-                        HStack(spacing: 30) {
-                            ScoreButton(icon: "minus") { updateScore(-1) }
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(Color.white)
+                                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
                             
-                            VStack(spacing: 4) {
-                                Text("\(scores[currentHole] ?? 4)")
-                                    .font(.system(size: 60))
-                                    .fontWeight(.black)
-                                    .foregroundColor(.primary)
-                                Text(scoreLabel)
-                                    .font(.system(size: 12))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(scoreColor)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 4)
-                                    .background(scoreColor.opacity(0.1))
-                                    .cornerRadius(8)
+                            HStack(spacing: 0) {
+                                Button(action: { updateScore(-1) }) {
+                                    ZStack {
+                                        Color.clear
+                                        Image(systemName: "minus")
+                                            .font(.system(size: 20, weight: .bold))
+                                            .foregroundColor(Theme.primary)
+                                    }
+                                }
+                                .frame(width: 70, height: 90)
+                                
+                                Divider().frame(height: 50)
+                                
+                                VStack(spacing: 4) {
+                                    Text("\(scores[currentHole] ?? 4)")
+                                        .font(.system(size: 48, weight: .black))
+                                        .foregroundColor(.primary)
+                                    
+                                    Text(scoreLabel)
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 4)
+                                        .background(Capsule().fill(scoreColor))
+                                }
+                                .frame(maxWidth: .infinity)
+                                
+                                Divider().frame(height: 50)
+                                
+                                Button(action: { updateScore(1) }) {
+                                    ZStack {
+                                        Color.clear
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 20, weight: .bold))
+                                            .foregroundColor(Theme.primary)
+                                    }
+                                }
+                                .frame(width: 70, height: 90)
                             }
-                            .frame(width: 100)
-                            
-                            ScoreButton(icon: "plus") { updateScore(1) }
                         }
+                        .frame(height: 100) // Reduced height
+                        .padding(.horizontal)
                     }
-                    .padding(.vertical, 20)
                     
-                    // Hole Selection (Bottom)
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("SIGUIENTE HOYO")
-                            .font(.system(size: 12))
-                            .fontWeight(.bold)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
+                    // Hole Selection
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("SIGUIENTE HOYO")
+                                .font(.system(size: 12, weight: .bold))
+                                .tracking(1)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 24)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
                                 ForEach(1...18, id: \.self) { hole in
-                                    Button(action: { currentHole = hole }) {
-                                        Text("\(hole)")
-                                            .font(.system(size: 16))
-                                            .fontWeight(.bold)
-                                            .frame(width: 50, height: 50)
-                                            .background(currentHole == hole ? Theme.primary : Color.white)
-                                            .foregroundColor(currentHole == hole ? .white : .primary)
-                                            .cornerRadius(15)
-                                            .shadow(color: .black.opacity(0.05), radius: 5)
+                                    Button(action: { 
+                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                            currentHole = hole 
+                                        }
+                                    }) {
+                                        VStack(spacing: 2) {
+                                            Text("\(hole)")
+                                                .font(.system(size: 16, weight: .bold))
+                                            if currentHole == hole {
+                                                Circle()
+                                                    .fill(Color.white)
+                                                    .frame(width: 4, height: 4)
+                                            }
+                                        }
+                                        .frame(width: 50, height: 58)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 14)
+                                                .fill(currentHole == hole ? Theme.primary : Color.white)
+                                                .shadow(
+                                                    color: currentHole == hole ? Theme.primary.opacity(0.4) : Color.black.opacity(0.05),
+                                                    radius: currentHole == hole ? 6 : 3,
+                                                    x: 0,
+                                                    y: currentHole == hole ? 3 : 2
+                                                )
+                                        )
+                                        .foregroundColor(currentHole == hole ? .white : .primary)
+                                        .scaleEffect(currentHole == hole ? 1.05 : 1.0)
                                     }
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 20)
                         }
                     }
                 }
-                .padding(.vertical)
+                .padding(.vertical, 20)
             }
         }
         .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text(alertTitle),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")) {
+                    if alertTitle == "Guardado" {
+                        dismiss()
+                    }
+                }
+            )
+        }
+    }
+    
+    private func updateMapRegion() {
+        // Center the camera on the hole
+        let centerLat = currentHoleLocation.latitude
+        let centerLon = currentHoleLocation.longitude
+        
+        position = .region(MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon),
+            span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+        ))
+    }
+    
+    // Updated finish logic with alert debug
+    private func finishRound() {
+        guard let userId = SupabaseManager.shared.currentUserId else {
+            alertTitle = "Error"
+            alertMessage = "No se encontró usuario activo. Intenta iniciar sesión nuevamente."
+            showAlert = true
+            return
+        }
+        
+        isSaving = true
+        
+        // Print debug info
+        print("Attempting to save round for user: \(userId)")
+        print("Course: \(course.name)")
+        print("Scores count: \(scores.count)")
+        
+        SupabaseManager.shared.saveRound(userId: userId, courseName: course.name, scores: scores) { result in
+            DispatchQueue.main.async {
+                isSaving = false
+                switch result {
+                case .success:
+                    alertTitle = "Guardado"
+                    alertMessage = "Tu ronda ha sido guardada exitosamente."
+                    showAlert = true
+                case .failure(let error):
+                    alertTitle = "Error al Guardar"
+                    alertMessage = "Detalle: \(error). Verifica tu conexión."
+                    showAlert = true
+                    print("Detailed Save Error: \(error)")
+                }
+            }
+        }
     }
     
     private var scoreLabel: String {
@@ -204,7 +385,7 @@ struct ActiveRoundView: View {
         let s = scores[currentHole] ?? 4
         if s < 4 { return .blue }
         if s > 4 { return .orange }
-        return .green
+        return Color(hex: "2E8B57")
     }
     
     private func updateScore(_ delta: Int) {
@@ -220,31 +401,17 @@ struct GPSDistItem: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
             Text(label)
-                .font(.system(size: 10))
-                .fontWeight(.bold)
-                .foregroundColor(.white.opacity(0.6))
+                .font(.system(size: 8, weight: .bold))
+                .tracking(0.5)
+                .foregroundColor(.white.opacity(0.8))
             Text(value)
-                .font(.system(size: 20))
-                .fontWeight(.bold)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
         }
-    }
-}
-
-struct ScoreButton: View {
-    let icon: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-                .frame(width: 60, height: 60)
-                .background(Color.white)
-                .cornerRadius(20)
-                .shadow(color: .black.opacity(0.05), radius: 10)
-        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(0.15))
+        .cornerRadius(8)
     }
 }
 
