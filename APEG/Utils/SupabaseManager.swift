@@ -268,4 +268,42 @@ class SupabaseManager {
             }
         }.resume()
     }
+    
+    func fetchPlayerStats(userId: String, completion: @escaping (Result<PlayerStats?, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/player_stats?user_id=eq.\(userId)&select=*") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let stats = try decoder.decode([PlayerStats].self, from: data)
+                completion(.success(stats.first))
+            } catch {
+                print("Decoding stats error: \(error)")
+                completion(.success(nil)) 
+            }
+        }.resume()
+    }
 }

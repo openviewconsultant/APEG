@@ -3,84 +3,149 @@ import SwiftUI
 struct ProfileView: View {
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = true
     
+    // State for user profile
+    @State private var profile: UserProfile?
+    @State private var isLoading = true
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header / Profile Info
-                    VStack(spacing: 16) {
-                        ZStack {
+                    if isLoading {
+                        VStack(spacing: 16) {
                             Circle()
-                                .fill(LinearGradient(colors: [Theme.primary, Theme.primary.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 100, height: 100)
-                        
-                        Text("AB")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                    }
-                    .shadow(color: Theme.primary.opacity(0.3), radius: 10, x: 0, y: 5)
-                    
-                    VStack(spacing: 4) {
-                        Text("Alex Barragán")
-                            .font(.system(size: 24, weight: .bold))
-                        Text("Miembro Premium")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Theme.primary)
-                    }
-                }
-                .padding(.top, 20)
-                
-                // Stats Grid
-                HStack(spacing: 20) {
-                    ProfileStatItem(title: "Handicap", value: "5.4")
-                    ProfileStatItem(title: "Rondas", value: "128")
-                    ProfileStatItem(title: "Torneos", value: "12")
-                }
-                .padding(.horizontal)
-                
-                // Menu Sections
-                VStack(spacing: 20) {
-                    ProfileMenuSection(title: "Mi Juego") {
-                        ProfileMenuRow(icon: "figure.golf", title: "Estadísticas de Juego", color: .blue)
-                        ProfileMenuRow(icon: "trophy", title: "Mis Torneos", color: .orange)
-                    }
-                    
-                    ProfileMenuSection(title: "Cuenta") {
-                         NavigationLink(destination: PersonalDataView()) {
-                             ProfileMenuRowContent(icon: "person", title: "Datos Personales", color: .gray)
-                         }
-                         Divider()
-                             .padding(.leading, 68)
-                             .opacity(0.5)
-
-                        ProfileMenuRow(icon: "creditcard", title: "Métodos de Pago", color: .purple)
-                        ProfileMenuRow(icon: "bell", title: "Notificaciones", color: .red)
-                    }
-                    
-                    // Logout Button
-                    Button(action: {
-                        isLoggedIn = false
-                    }) {
-                        HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("Cerrar Sesión")
-                                .fontWeight(.bold)
+                                .fill(Color.gray.opacity(0.1))
+                                .frame(width: 100, height: 100)
+                                .overlay(ProgressView())
+                            
+                            VStack(spacing: 4) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color.gray.opacity(0.1))
+                                    .frame(width: 150, height: 24)
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color.gray.opacity(0.1))
+                                    .frame(width: 100, height: 14)
+                            }
                         }
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(16)
+                        .padding(.top, 20)
+                    } else {
+                        VStack(spacing: 16) {
+                            ZStack {
+                                Circle()
+                                    .fill(LinearGradient(colors: [Theme.primary, Theme.primary.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .frame(width: 100, height: 100)
+                                
+                                if let photoUrl = profile?.idPhotoUrl, !photoUrl.isEmpty {
+                                    // In a real app we would load the image from URL.
+                                    // For now, we fall back to initials.
+                                    Text(getInitials(name: profile?.fullName))
+                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                } else {
+                                    Text(getInitials(name: profile?.fullName))
+                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                }
+                            }
+                            .shadow(color: Theme.primary.opacity(0.3), radius: 10, x: 0, y: 5)
+                            
+                            VStack(spacing: 4) {
+                                Text(profile?.fullName ?? "Usuario")
+                                    .font(.system(size: 24, weight: .bold))
+                                Text("Miembro Premium") 
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(Theme.primary)
+                            }
+                        }
+                        .padding(.top, 20)
+                    }
+                    
+                    // Stats Grid
+                    // These could also be fetched in the future
+                    HStack(spacing: 20) {
+                        ProfileStatItem(title: "Handicap", value: "5.4")
+                        ProfileStatItem(title: "Rondas", value: "128")
+                        ProfileStatItem(title: "Torneos", value: "12")
                     }
                     .padding(.horizontal)
-                    .padding(.top, 10)
+                    
+                    // Menu Sections
+                    VStack(spacing: 20) {
+                        ProfileMenuSection(title: "Mi Juego") {
+                            NavigationLink(destination: GameStatsView()) {
+                                ProfileMenuRowContent(icon: "figure.golf", title: "Estadísticas de Juego", color: .blue)
+                            }
+                            Divider()
+                                .padding(.leading, 68)
+                                .opacity(0.5)
+                            
+                            ProfileMenuRow(icon: "trophy", title: "Mis Torneos", color: .orange)
+                        }
+                        
+                        ProfileMenuSection(title: "Cuenta") {
+                             NavigationLink(destination: PersonalDataView()) {
+                                 ProfileMenuRowContent(icon: "person", title: "Datos Personales", color: .gray)
+                             }
+                             Divider()
+                                 .padding(.leading, 68)
+                                 .opacity(0.5)
+
+                            ProfileMenuRow(icon: "creditcard", title: "Métodos de Pago", color: .purple)
+                            ProfileMenuRow(icon: "bell", title: "Notificaciones", color: .red)
+                        }
+                        
+                        // Logout Button
+                        Button(action: {
+                            isLoggedIn = false
+                        }) {
+                            HStack {
+                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Text("Cerrar Sesión")
+                                    .fontWeight(.bold)
+                            }
+                            .foregroundColor(.red)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(16)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 10)
+                    }
                 }
+                .padding(.bottom, 120) // Space for tab bar
             }
-            .padding(.bottom, 120) // Space for tab bar
-        }
             .background(Color(hex: "F8F9FA").ignoresSafeArea())
             .navigationBarHidden(true)
+            .onAppear {
+                loadProfile()
+            }
         }
+    }
+    
+    private func loadProfile() {
+        isLoading = true
+        SupabaseManager.shared.fetchProfile { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                switch result {
+                case .success(let data):
+                    self.profile = data
+                case .failure(let error):
+                    print("Error loading profile: \(error)")
+                }
+            }
+        }
+    }
+    
+    private func getInitials(name: String?) -> String {
+        guard let name = name, !name.isEmpty else { return "??" }
+        let parts = name.components(separatedBy: " ")
+        if parts.count >= 2 {
+            return "\(parts[0].prefix(1))\(parts[1].prefix(1))".uppercased()
+        }
+        return String(name.prefix(2)).uppercased()
     }
 }
 

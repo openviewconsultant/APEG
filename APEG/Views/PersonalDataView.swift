@@ -88,7 +88,7 @@ struct PersonalDataView: View {
                             }
                             
                             if !isEditing {
-                                if let idUrl = profile.idPhotoUrl {
+                                if profile.idPhotoUrl != nil {
                                     VStack(alignment: .leading, spacing: 12) {
                                         HStack {
                                             Image(systemName: "doc.text.image")

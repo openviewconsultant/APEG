@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var showPlayView = false
+    @State private var profile: UserProfile?
     
     var body: some View {
         ScrollView {
@@ -59,6 +60,15 @@ struct HomeView: View {
         .fullScreenCover(isPresented: $showPlayView) {
             PlayView()
         }
+        .onAppear {
+            SupabaseManager.shared.fetchProfile { result in
+                if case .success(let data) = result {
+                    DispatchQueue.main.async {
+                        self.profile = data
+                    }
+                }
+            }
+        }
     }
     
     private var headerSection: some View {
@@ -73,7 +83,8 @@ struct HomeView: View {
                     Text("BUENOS DÍAS")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.secondary)
-                    Text("Alex")
+                    // Display fetched first name or Default
+                    Text(profile?.fullName?.components(separatedBy: " ").first ?? "Golfista")
                         .font(.system(size: 20, weight: .bold))
                 }
             }
