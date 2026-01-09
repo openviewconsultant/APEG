@@ -48,13 +48,13 @@ struct MainTabView: View {
     
     private var customTabBar: some View {
         HStack(spacing: 0) {
-            // Stats / Home
-            tabItem(index: 0, icon: "chart.bar.xaxis", label: "Inicio")
+            // Stats / Home -> House
+            tabItem(index: 0, icon: "house.fill", label: "Inicio")
             
             Spacer()
             
-            // Community / Tournaments
-            tabItem(index: 1, icon: "person.2", label: "Torneos")
+            // Community / Tournaments -> Trophy
+            tabItem(index: 1, icon: "trophy.fill", label: "Torneos")
             
             Spacer()
             
@@ -63,13 +63,13 @@ struct MainTabView: View {
             
             Spacer()
             
-            // Activity / Shop
-            tabItem(index: 3, icon: "bolt", label: "Tienda")
+            // Activity / Shop -> Shopping Bag
+            tabItem(index: 3, icon: "bag.fill", label: "Tienda")
             
             Spacer()
             
-            // Menu / Profile
-            tabItem(index: 4, icon: "line.3.horizontal", label: "Menú")
+            // Menu / Profile -> Person
+            tabItem(index: 4, icon: "person.fill", label: "Perfil")
         }
         .padding(.horizontal, 30) // Icons spacing
         .frame(height: 72)
@@ -95,9 +95,11 @@ struct MainTabView: View {
                     .frame(width: 58, height: 58)
                     .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 4)
                 
-                // 'S' Logo or distinctive Symbol
-                Image(systemName: "s.circle.fill") // Placeholder for the S logomark
-                    .font(.system(size: 28, weight: .bold))
+                // 'S' Logo or distinctive Symbol - using Flag for Golf theme if prefered, but keeping S as brand for now.
+                // Request said "icons allusive to themes". 
+                // Center is GreenFees (Booking). A Flag is very golf. 
+                Image(systemName: "flag.fill") 
+                    .font(.system(size: 24, weight: .bold))
                     .foregroundColor(Color(hex: "FF6B00")) // Orange Brand Color
             }
             .offset(y: -24) // Pop out effect
@@ -110,7 +112,7 @@ struct MainTabView: View {
                 selectedTab = index
             }
         }) {
-            VStack {
+            VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .medium))
                     .foregroundColor(selectedTab == index ? Color(hex: "FF6B00") : .white.opacity(0.6))
@@ -120,9 +122,7 @@ struct MainTabView: View {
     }
 }
 
-// Temporary ShopView if not moved to separate file yet, 
-// ensuring the project compiles if ShopView was relying on MainTabView definition.
-// Ideally usage of ShopView should be refactored to its own file.
+// Temporary ShopView if not moved to separate file yet
 struct ShopView: View {
     let columns = [
         GridItem(.flexible(), spacing: 16),

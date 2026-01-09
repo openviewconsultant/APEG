@@ -202,10 +202,7 @@ class SupabaseManager {
                 let decoder = JSONDecoder()
                 // Supabase standard format for timestamp is ISO8601
                 let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00" // Adjust as needed for specific Postgres format
-                // Often JSONDecoder can handle ISO8601 automatically if we don't custom format, but sometimes Postgres returns slightly different strings.
-                // For now, let's stick to the default string decoding in the model or standard strategy.
-                // Our model has Strings for simplicity.
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00" 
                 
                 let profiles = try decoder.decode([UserProfile].self, from: data)
                 if let profile = profiles.first {
@@ -216,6 +213,58 @@ class SupabaseManager {
             } catch {
                 print("Decoding error: \(error)")
                 completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
+    
+    func updateProfile(userId: String, fullName: String, federationCode: String, email: String, completion: @escaping (Result<Bool, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/profiles?id=eq.\(userId)") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+            request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        }
+        
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("return=minimal", forHTTPHeaderField: "Prefer")
+        
+        let body: [String: Any] = [
+            "full_name": fullName,
+            "federation_code": federationCode,
+            "email": email, 
+            "updated_at": ISO8601DateFormatter().string(from: Date())
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(.networkError("Invalid response")))
+                return
+            }
+            
+            if (200...299).contains(httpResponse.statusCode) {
+                completion(.success(true))
+            } else {
+                if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    let message = json["message"] as? String ?? json["msg"] as? String ?? "Unknown error"
+                    completion(.failure(.authError(message)))
+                } else {
+                    completion(.failure(.authError("Status code \(httpResponse.statusCode)")))
+                }
             }
         }.resume()
     }

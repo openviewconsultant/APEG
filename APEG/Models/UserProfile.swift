@@ -6,6 +6,7 @@ struct UserProfile: Codable, Identifiable {
     let federationCode: String?
     let idPhotoUrl: String?
     let updatedAt: String?
+    let email: String?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -13,5 +14,6 @@ struct UserProfile: Codable, Identifiable {
         case federationCode = "federation_code"
         case idPhotoUrl = "id_photo_url"
         case updatedAt = "updated_at"
+        case email
     }
 }

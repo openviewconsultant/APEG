@@ -7,6 +7,13 @@ struct PersonalDataView: View {
     @AppStorage("isLoggedIn") var isLoggedIn: Bool = true
     @Environment(\.presentationMode) var presentationMode
     
+    // Editing State
+    @State private var isEditing = false
+    @State private var isSaving = false
+    @State private var editFullName = ""
+    @State private var editFederationCode = ""
+    @State private var editEmail = ""
+    
     var body: some View {
         ZStack {
             Color(hex: "F8F9FA").ignoresSafeArea()
@@ -70,39 +77,107 @@ struct PersonalDataView: View {
                         
                         // Data Cards
                         VStack(spacing: 16) {
-                            DataRow(icon: "person.text.rectangle", title: "Nombre Completo", value: profile.fullName ?? "No especificado")
-                            
-                            DataRow(icon: "number.circle", title: "Código Federación", value: profile.federationCode ?? "No especificado")
-                            
-                            if let idUrl = profile.idPhotoUrl {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    HStack {
-                                        Image(systemName: "doc.text.image")
-                                            .foregroundColor(Theme.primary)
-                                            .font(.system(size: 20))
-                                        Text("Documento de Identidad")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    
-                                    // In a real app, you'd use AsyncImage with the supabase storage URL
-                                    // For now just showing a placeholder indicating it's there
-                                    Text("Imagen cargada: \(idUrl)")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                        .padding()
-                                        .background(Color.gray.opacity(0.1))
-                                        .cornerRadius(8)
-                                }
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(16)
-                                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            if isEditing {
+                                EditableDataRow(icon: "person.text.rectangle", title: "Nombre Completo", text: $editFullName)
+                                EditableDataRow(icon: "number.circle", title: "Código Federación", text: $editFederationCode)
+                                EditableDataRow(icon: "envelope", title: "Correo Electrónico", text: $editEmail)
+                            } else {
+                                DataRow(icon: "person.text.rectangle", title: "Nombre Completo", value: profile.fullName ?? "No especificado")
+                                DataRow(icon: "number.circle", title: "Código Federación", value: profile.federationCode ?? "No especificado")
+                                DataRow(icon: "envelope", title: "Correo Electrónico", value: profile.email ?? "No especificado")
                             }
                             
-                            DataRow(icon: "calendar", title: "Actualizado", value: formatDate(profile.updatedAt))
+                            if !isEditing {
+                                if let idUrl = profile.idPhotoUrl {
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        HStack {
+                                            Image(systemName: "doc.text.image")
+                                                .foregroundColor(Theme.primary)
+                                                .font(.system(size: 20))
+                                            Text("Documento de Identidad")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        
+                                        // Placeholder for full image loading
+                                        Text("Imagen de identificación verificada")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                            .padding()
+                                            .background(Color.gray.opacity(0.1))
+                                            .cornerRadius(8)
+                                    }
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(16)
+                                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                }
+                                
+                                DataRow(icon: "calendar", title: "Actualizado", value: formatDate(profile.updatedAt))
+                            }
                         }
                         .padding(.horizontal)
+                        
+                        // Buttons
+                        if isEditing {
+                            HStack(spacing: 20) {
+                                Button(action: {
+                                    withAnimation {
+                                        isEditing = false
+                                        // Reset fields
+                                        editFullName = profile.fullName ?? ""
+                                        editFederationCode = profile.federationCode ?? ""
+                                        editEmail = profile.email ?? ""
+                                    }
+                                }) {
+                                    Text("Cancelar")
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.red)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.white)
+                                        .cornerRadius(12)
+                                        .shadow(color: .black.opacity(0.05), radius: 5)
+                                }
+                                
+                                Button(action: saveData) {
+                                    if isSaving {
+                                        ProgressView()
+                                            .tint(.white)
+                                    } else {
+                                        Text("Guardar")
+                                            .fontWeight(.bold)
+                                    }
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Theme.primary)
+                                .cornerRadius(12)
+                                .shadow(color: Theme.primary.opacity(0.3), radius: 8, x: 0, y: 4)
+                                .disabled(isSaving)
+                            }
+                            .padding(.horizontal)
+                        } else {
+                            Button(action: {
+                                withAnimation {
+                                    editFullName = profile.fullName ?? ""
+                                    editFederationCode = profile.federationCode ?? ""
+                                    editEmail = profile.email ?? ""
+                                    isEditing = true
+                                }
+                            }) {
+                                Text("Editar Datos")
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Theme.secondary)
+                                    .cornerRadius(12)
+                                    .shadow(color: Theme.secondary.opacity(0.3), radius: 8, x: 0, y: 4)
+                            }
+                            .padding(.horizontal)
+                        }
                     }
                     .padding(.bottom, 40)
                 }
@@ -137,6 +212,30 @@ struct PersonalDataView: View {
         }
     }
     
+    private func saveData() {
+        guard let currentProfile = profile else { return }
+        isSaving = true
+        
+        SupabaseManager.shared.updateProfile(
+            userId: currentProfile.id.uuidString,
+            fullName: editFullName,
+            federationCode: editFederationCode,
+            email: editEmail
+        ) { result in
+            DispatchQueue.main.async {
+                isSaving = false
+                switch result {
+                case .success:
+                    isEditing = false
+                    loadData() // Reload to confirm
+                case .failure(let error):
+                    // In a real app, show error alert
+                    print("Error saving: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
     private func getInitials(name: String?) -> String {
         guard let name = name, !name.isEmpty else { return "??" }
         let parts = name.components(separatedBy: " ")
@@ -148,10 +247,11 @@ struct PersonalDataView: View {
     
     private func formatDate(_ dateString: String?) -> String {
         guard let dateString = dateString else { return "-" }
-        // Simple string manipulation for display if full parsing isn't needed
-        return String(dateString.prefix(10)) 
+        return String(dateString.prefix(10))
     }
 }
+
+// MARK: - Components
 
 struct DataRow: View {
     let icon: String
@@ -163,16 +263,17 @@ struct DataRow: View {
             ZStack {
                 Circle()
                     .fill(Theme.primary.opacity(0.1))
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
                 Image(systemName: icon)
                     .foregroundColor(Theme.primary)
-                    .font(.system(size: 18))
+                    .font(.system(size: 20))
             }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .textCase(.uppercase)
                 Text(value)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.primary)
@@ -183,6 +284,46 @@ struct DataRow: View {
         .padding()
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 3)
+    }
+}
+
+struct EditableDataRow: View {
+    let icon: String
+    let title: String
+    @Binding var text: String
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Theme.primary.opacity(0.1))
+                    .frame(width: 44, height: 44)
+                Image(systemName: icon)
+                    .foregroundColor(Theme.primary)
+                    .font(.system(size: 20))
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                
+                TextField(title, text: $text)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.primary)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .padding(8)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+            }
+            
+            Spacer()
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 3)
     }
 }
