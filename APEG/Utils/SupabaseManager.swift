@@ -309,6 +309,61 @@ class SupabaseManager {
 
     // MARK: - Rounds & Scores
     
+    func fetchRounds(userId: String, completion: @escaping (Result<[Round], SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/rounds?user_id=eq.\(userId)&select=*&order=date_played.desc") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else {
+             request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS+00:00"
+                
+                decoder.dateDecodingStrategy = .custom { decoder in
+                     let container = try decoder.singleValueContainer()
+                     let dateString = try container.decode(String.self)
+                     if let date = formatter.date(from: dateString) { return date }
+                     formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss+00:00"
+                     if let date = formatter.date(from: dateString) { return date }
+                     // Try another common one if needed, or simple fallback
+                     formatter.dateFormat = "yyyy-MM-dd"
+                     if let date = formatter.date(from: dateString) { return date }
+                     
+                     throw DecodingError.dataCorruptedError(in: container, debugDescription: "Cannot decode date string \(dateString)")
+                }
+                
+                let rounds = try decoder.decode([Round].self, from: data)
+                completion(.success(rounds))
+            } catch {
+                print("Decoding rounds error: \(error)")
+                completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
+
+    
     func saveRound(userId: String, courseName: String, scores: [Int: Int], completion: @escaping (Result<Void, SupabaseError>) -> Void) {
         guard let url = URL(string: "\(supabaseURL)/rest/v1/rounds") else {
             completion(.failure(.invalidURL))

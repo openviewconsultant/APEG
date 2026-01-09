@@ -1,168 +1,382 @@
 import SwiftUI
+import Foundation
 
 struct GameStatsView: View {
     @State private var stats: PlayerStats?
+    @State private var rounds: [Round] = []
     @State private var isLoading = true
+    
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                // Main Header Stats
-                if isLoading {
-                    ProgressView()
-                        .padding()
-                } else if let stats = stats {
-                    HStack(spacing: 16) {
-                        StatHighlightCard(title: "Handicap", value: String(format: "%.1f", stats.handicapIndex), color: Theme.primary)
-                        StatHighlightCard(title: "Promedio", value: String(format: "%.1f", stats.averageScore), color: .orange)
-                        StatHighlightCard(title: "Mejor Ronda", value: "\(stats.bestScore)", color: .blue)
+            VStack(spacing: 30) {
+                
+                // Header / Title
+                HStack {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "arrow.left")
+                            .font(.title3)
+                            .foregroundColor(.black)
+                            .padding(12)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                     }
-                    .padding(.horizontal)
                     
-                    // Detailed Performance
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Rendimiento")
-                            .font(.system(size: 18, weight: .bold))
-                            .padding(.horizontal)
-                        
-                        VStack(spacing: 12) {
-                            StatRow(label: "Fairways Acertados (FIR)", value: String(format: "%.1f%%", stats.fairwaysHitRate), icon: "arrow.up.forward.circle.fill", color: .green)
-                            StatRow(label: "Greens en Regulación (GIR)", value: String(format: "%.1f%%", stats.girRate), icon: "flag.circle.fill", color: .blue)
-                            StatRow(label: "Putts por Ronda", value: String(format: "%.1f", stats.averagePutts), icon: "circle.circle.fill", color: .purple)
-                            StatRow(label: "Scrambling", value: String(format: "%.1f%%", stats.scramblingRate), icon: "bolt.circle.fill", color: .orange)
-                        }
-                        .padding()
+                    Text("Rendimiento")
+                        .font(.custom("Outfit-Bold", size: 30))
+                        .foregroundColor(Theme.deepBlack)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.title3)
+                        .foregroundColor(Theme.primary)
+                        .padding(12)
                         .background(Color.white)
-                        .cornerRadius(20)
-                        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
-                        .padding(.horizontal)
-                    }
-                    
-                    // Scoring Breakdown
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Desglose de Puntuación")
-                            .font(.system(size: 18, weight: .bold))
-                            .padding(.horizontal)
-                        
-                        HStack(spacing: 12) {
-                            ScoreCard(label: "Birdies+", value: "\(stats.totalBirdies + stats.totalEagles)", color: .green)
-                            ScoreCard(label: "Pars", value: "\(stats.totalPars)", color: .gray)
-                            ScoreCard(label: "Bogeys", value: "\(stats.totalBogeys)", color: .orange)
-                            ScoreCard(label: "Dobles+", value: "\(stats.totalDoublesWorse)", color: .red)
-
-                        }
-                        .padding(.horizontal)
-                    }
-                    
-                    Text("Basado en \(stats.totalRounds) rondas registradas")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.top)
-                } else {
-                    VStack(spacing: 16) {
-                        Image(systemName: "chart.bar.xaxis")
-                            .font(.system(size: 50))
-                            .foregroundColor(.gray)
-                        Text("No hay estadísticas disponibles")
-                            .font(.headline)
-                        Text("Juega tu primera ronda para ver tus estadísticas.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.top, 50)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                 }
+                .padding(.horizontal)
+                .padding(.top, 20)
+                
+                // Main Handicap Circle
+                ZStack {
+                    Circle()
+                        .stroke(Color.white, lineWidth: 20)
+                        .shadow(color: .black.opacity(0.03), radius: 10)
+                    
+                    Circle()
+                        .trim(from: 0, to: 0.75)
+                        .stroke(
+                            LinearGradient(gradient: Gradient(colors: [Theme.primary, Theme.secondary]), startPoint: .topLeading, endPoint: .bottomTrailing),
+                            style: StrokeStyle(lineWidth: 18, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+                    
+                    VStack {
+                        Text(estimatedHandicap)
+                            .font(.system(size: 48, weight: .bold, design: .rounded))
+                            .foregroundColor(Theme.deepBlack)
+                        Text("HANDICAP")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .tracking(2)
+                            .foregroundColor(Theme.primary)
+                    }
+                }
+                .frame(width: 180, height: 180)
+                .padding(.vertical, 10)
+                
+                // Quick Stats Grid
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                    ModernStatCard(title: "Promedio", value: averageScore, icon: "target", color: .orange)
+                    ModernStatCard(title: "Mejor Ronda", value: bestScore, icon: "trophy.fill", color: .yellow)
+                    ModernStatCard(title: "Rondas", value: "\(rounds.count)", icon: "figure.golf", color: .blue)
+                    ModernStatCard(title: "Ranking", value: "#42", icon: "list.number", color: .purple)
+                }
+                .padding(.horizontal)
+                
+                // Performance Chart Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Tendencia de Rondas")
+                        .font(.custom("Outfit-Bold", size: 18))
+                        .foregroundColor(Theme.deepBlack)
+                        .padding(.leading)
+                    
+                    if rounds.isEmpty {
+                        EmptyChartPlaceholder()
+                    } else {
+                        ScoreTrendChart(rounds: rounds)
+                        
+                        Text("Análisis de Habilidades")
+                            .font(.custom("Outfit-Bold", size: 18))
+                            .foregroundColor(Theme.deepBlack)
+                            .padding(.leading)
+                            .padding(.top, 10)
+                            
+                        SkillRadarChart()
+                    }
+                }
+                .padding(.vertical)
+                
+                // Recent Rounds List
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Historial Reciente")
+                        .font(.custom("Outfit-Bold", size: 18))
+                        .foregroundColor(Theme.deepBlack)
+                        .padding(.horizontal)
+                    
+                    if rounds.isEmpty {
+                        VStack(spacing: 8) {
+                            Image(systemName: "golfball")
+                                .font(.largeTitle)
+                                .foregroundColor(.gray.opacity(0.3))
+                            Text("Sin historial aún")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(40)
+                    } else {
+                        ForEach(rounds.prefix(5)) { round in
+                            ModernRoundRow(round: round)
+                        }
+                    }
+                }
+                .padding(.bottom, 120)
             }
-            .padding(.vertical)
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
-        .navigationTitle("Estadísticas")
-        .navigationBarTitleDisplayMode(.inline)
+        .background(Theme.background.ignoresSafeArea())
+        .navigationBarHidden(true)
         .onAppear {
-            loadStats()
+            loadData()
         }
     }
     
-    private func loadStats() {
+    private var averageScore: String {
+        guard !rounds.isEmpty else { return "--" }
+        let total = rounds.reduce(0) { $0 + $1.totalScore }
+        return String(format: "%.1f", Double(total) / Double(rounds.count))
+    }
+    
+    private var bestScore: String {
+        guard let min = rounds.map({ $0.totalScore }).min() else { return "--" }
+        return "\(min)"
+    }
+    
+    private var estimatedHandicap: String {
+        guard !rounds.isEmpty else { return "54.0" }
+        let avg = Double(rounds.reduce(0) { $0 + $1.totalScore }) / Double(rounds.count)
+        let diff = max(0, avg - 72)
+        return String(format: "%.1f", diff * 0.8)
+    }
+    
+    private func loadData() {
         guard let userId = SupabaseManager.shared.currentUserId else { return }
-        
-        SupabaseManager.shared.fetchPlayerStats(userId: userId) { result in
+        SupabaseManager.shared.fetchRounds(userId: userId) { result in
             DispatchQueue.main.async {
                 isLoading = false
-                switch result {
-                case .success(let data):
-                    self.stats = data
-                case .failure(let error):
-                    print("Error chart: \(error)")
+                if case .success(let fetchedRounds) = result {
+                    self.rounds = fetchedRounds
                 }
             }
         }
     }
 }
 
-struct StatHighlightCard: View {
-    let title: String
-    let value: String
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            Text(value)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(color)
-            Text(title)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-    }
-}
+// MARK: - Subviews
 
-struct StatRow: View {
-    let label: String
+struct ModernStatCard: View {
+    let title: String
     let value: String
     let icon: String
     let color: Color
     
     var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(color)
-                .font(.system(size: 24))
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .font(.headline)
+                    .padding(8)
+                    .background(color.opacity(0.1))
+                    .clipShape(Circle())
+                Spacer()
+            }
             
-            Text(label)
-                .font(.system(size: 14, weight: .medium))
-            
-            Spacer()
-            
-            Text(value)
-                .font(.system(size: 16, weight: .bold))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(value)
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(Theme.deepBlack)
+                
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+            }
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
     }
 }
 
-struct ScoreCard: View {
-    let label: String
-    let value: String
-    let color: Color
-    
+struct EmptyChartPlaceholder: View {
     var body: some View {
-        VStack(spacing: 6) {
-            Text(value)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(color)
-            Text(label)
-                .font(.system(size: 10, weight: .bold))
+        VStack(spacing: 12) {
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .font(.largeTitle)
+                .foregroundColor(.gray.opacity(0.3))
+            Text("No hay datos suficientes")
+                .font(.caption)
                 .foregroundColor(.secondary)
         }
+        .frame(height: 150)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
         .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .cornerRadius(20)
+        .padding(.horizontal)
+        .shadow(color: .black.opacity(0.03), radius: 5)
+    }
+}
+
+struct ScoreTrendChart: View {
+    let rounds: [Round]
+    
+    var body: some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+            let recent = Array(rounds.prefix(10).reversed())
+            
+            if !recent.isEmpty {
+                let scores = recent.map { CGFloat($0.totalScore) }
+                let minS = (scores.min() ?? 72) - 5
+                let maxS = (scores.max() ?? 100) + 5
+                let range = max(1, maxS - minS)
+                
+                Path { path in
+                    for (index, score) in scores.enumerated() {
+                        let x = width * CGFloat(index) / CGFloat(max(scores.count - 1, 1))
+                        let y = height - ((score - minS) / range) * height
+                        if index == 0 { path.move(to: CGPoint(x: x, y: y)) }
+                        else { path.addLine(to: CGPoint(x: x, y: y)) }
+                    }
+                }
+                .stroke(
+                    LinearGradient(gradient: Gradient(colors: [Theme.primary, Theme.secondary]), startPoint: .leading, endPoint: .trailing),
+                    style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                )
+                
+                Path { path in
+                    for (index, score) in scores.enumerated() {
+                        let x = width * CGFloat(index) / CGFloat(max(scores.count - 1, 1))
+                        let y = height - ((score - minS) / range) * height
+                        if index == 0 {
+                            path.move(to: CGPoint(x: x, y: height))
+                            path.addLine(to: CGPoint(x: x, y: y))
+                        } else {
+                            path.addLine(to: CGPoint(x: x, y: y))
+                        }
+                        if index == scores.count - 1 { path.addLine(to: CGPoint(x: x, y: height)) }
+                    }
+                    path.closeSubpath()
+                }
+                .fill(LinearGradient(gradient: Gradient(colors: [Theme.primary.opacity(0.15), Theme.primary.opacity(0.0)]), startPoint: .top, endPoint: .bottom))
+            }
+        }
+        .frame(height: 180)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .padding(.horizontal)
+    }
+}
+
+struct SkillRadarChart: View {
+    let stats: [Double] = [0.8, 0.6, 0.9, 0.7, 0.5]
+    
+    var body: some View {
+        ZStack {
+            ForEach([0.2, 0.4, 0.6, 0.8, 1.0], id: \.self) { r in
+                PolygonShape(sides: 5, radius: 90 * r)
+                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+            }
+            
+            PolygonShape(sides: 5, radius: 90, values: stats)
+                .fill(Theme.primary.opacity(0.2))
+                .overlay(PolygonShape(sides: 5, radius: 90, values: stats).stroke(Theme.primary, lineWidth: 2))
+            
+            VStack {
+                Text("Longitud").font(.system(size: 10, weight: .bold)).foregroundColor(.secondary).offset(y: -105)
+                HStack {
+                   Text("Mental").font(.system(size: 10, weight: .bold)).foregroundColor(.secondary).offset(x: -110)
+                   Spacer()
+                   Text("Puntería").font(.system(size: 10, weight: .bold)).foregroundColor(.secondary).offset(x: 110)
+                }
+                HStack {
+                   Text("Putting").font(.system(size: 10, weight: .bold)).foregroundColor(.secondary).offset(x: -80, y: 70)
+                   Spacer()
+                   Text("Recovery").font(.system(size: 10, weight: .bold)).foregroundColor(.secondary).offset(x: 80, y: 70)
+                }
+            }
+            .frame(width: 200, height: 200)
+        }
+        .frame(height: 260)
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
+        .padding(.horizontal)
+    }
+}
+
+struct PolygonShape: Shape {
+    var sides: Int
+    var radius: CGFloat
+    var values: [Double]? = nil
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.width / 2, y: rect.height / 2)
+        let angle = 2.0 * .pi / Double(sides)
+        for i in 0..<sides {
+            let r = values != nil ? radius * (values![i]) : radius
+            let x = center.x + r * cos(Double(i) * angle - .pi / 2)
+            let y = center.y + r * sin(Double(i) * angle - .pi / 2)
+            if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
+            else { path.addLine(to: CGPoint(x: x, y: y)) }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct ModernRoundRow: View {
+    let round: Round
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(round.courseName)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Theme.deepBlack)
+                Text(dateFormatter.string(from: round.datePlayed))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            
+            Text("\(round.totalScore)")
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(scoreColor(score: round.totalScore))
+                .frame(width: 44, height: 44)
+                .background(scoreColor(score: round.totalScore).opacity(0.1))
+                .clipShape(Circle())
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 3)
+        .padding(.horizontal)
+    }
+    
+    private let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f
+    }()
+    
+    private func scoreColor(score: Int) -> Color {
+        if score < 72 { return .blue }
+        if score < 80 { return Theme.primary }
+        return .orange
     }
 }
