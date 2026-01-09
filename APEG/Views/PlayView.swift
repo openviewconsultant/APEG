@@ -41,20 +41,29 @@ struct PlayView: View {
                                 Text(course.name)
                                     .font(.system(size: 16))
                                     .fontWeight(.bold)
+                                    .lineLimit(1)
                                 Text(course.location)
                                     .font(.system(size: 14))
                                     .foregroundColor(.secondary)
+                                    .lineLimit(1)
                                 HStack {
                                     Label(course.distance, systemImage: "location.fill")
                                     Spacer()
-                                    Label(course.rating, systemImage: "star.fill")
-                                        .foregroundColor(.orange)
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "star.fill")
+                                            .foregroundColor(.orange)
+                                        Text(course.rating)
+                                            .foregroundColor(Theme.primary)
+                                            .fontWeight(.bold)
+                                    }
                                 }
                                 .font(.system(size: 12))
                                 .fontWeight(.medium)
                                 .foregroundColor(.secondary)
                             }
                         }
+                        .padding(.vertical, 8) // Add internal vertical padding
+                        .padding(.horizontal, 4) // Add internal horizontal padding to pull away from edges
                     }
                     .foregroundColor(.primary)
                     .listRowSeparator(.hidden)

@@ -45,28 +45,43 @@ struct MainTabView: View {
     @State private var selectedTab = 0
     @Namespace private var animation
     
+    init() {
+        // Force the native TabBar to be invisible and pass-through
+        UITabBar.appearance().isHidden = true
+        UITabBar.appearance().backgroundColor = .clear
+        UITabBar.appearance().backgroundImage = UIImage()
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
                 HomeView()
                     .tag(0)
+                    .toolbarBackground(.hidden, for: .tabBar)
                 
                 TournamentsView()
                     .tag(1)
+                    .toolbarBackground(.hidden, for: .tabBar)
                 
                 GreenFeesView()
                     .tag(2)
+                    .toolbarBackground(.hidden, for: .tabBar)
                 
                 ShopView()
                     .tag(3)
+                    .toolbarBackground(.hidden, for: .tabBar)
                 
                 ProfileView()
                     .tag(4)
+                    .toolbarBackground(.hidden, for: .tabBar)
             }
-            .toolbar(.hidden, for: .tabBar)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 80) // Spacer for content scroll
+            }
             
             customTabBar
         }
+        .ignoresSafeArea(.all, edges: .bottom)
     }
     
     private var customTabBar: some View {
