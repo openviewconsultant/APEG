@@ -515,4 +515,45 @@ class SupabaseManager {
             }
         }.resume()
     }
+    
+    func saveProduct(name: String, brand: String, price: Double, category: String, description: String, stock: Int, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/products") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "name": name,
+            "brand": brand,
+            "price": price,
+            "category": category,
+            "description": description,
+            "stock_quantity": stock
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                completion(.failure(.networkError("Failed to save product")))
+            }
+        }.resume()
+    }
 }

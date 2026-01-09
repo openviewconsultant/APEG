@@ -3,6 +3,8 @@ import SwiftUI
 struct ShopView: View {
     @State private var products: [Product] = []
     @State private var isLoading = true
+    @State private var isPremium = false
+    @State private var showAddProduct = false
     
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -17,6 +19,16 @@ struct ShopView: View {
                         .font(.custom("Outfit-Bold", size: 34))
                         .foregroundColor(Theme.primary)
                     Spacer()
+                    
+                    if isPremium {
+                        Button(action: { showAddProduct = true }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(Theme.primary)
+                        }
+                        .padding(.trailing, 8)
+                    }
+                    
                     Button(action: {}) {
                         Image(systemName: "cart")
                             .font(.title3)
@@ -59,8 +71,24 @@ struct ShopView: View {
             .padding(.top, 50)
         }
         .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .sheet(isPresented: $showAddProduct) {
+            AddProductView().onDisappear {
+                loadProducts() // Refresh list when modal closes
+            }
+        }
         .onAppear {
+            checkPremiumStatus()
             loadProducts()
+        }
+    }
+    
+    private func checkPremiumStatus() {
+        SupabaseManager.shared.fetchProfile { result in
+            if case .success(let profile) = result {
+                DispatchQueue.main.async {
+                    self.isPremium = profile.isPremium ?? false
+                }
+            }
         }
     }
     

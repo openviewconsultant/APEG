@@ -159,7 +159,7 @@ struct GameStatsView: View {
         guard let userId = SupabaseManager.shared.currentUserId else { return }
         SupabaseManager.shared.fetchRounds(userId: userId) { result in
             DispatchQueue.main.async {
-                isLoading = false
+                self.isLoading = false
                 if case .success(let fetchedRounds) = result {
                     self.rounds = fetchedRounds
                 }

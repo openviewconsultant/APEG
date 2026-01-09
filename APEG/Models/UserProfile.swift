@@ -7,6 +7,7 @@ struct UserProfile: Codable, Identifiable {
     let idPhotoUrl: String?
     let updatedAt: String?
     let email: String?
+    let isPremium: Bool?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -15,5 +16,6 @@ struct UserProfile: Codable, Identifiable {
         case idPhotoUrl = "id_photo_url"
         case updatedAt = "updated_at"
         case email
+        case isPremium = "is_premium"
     }
 }

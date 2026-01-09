@@ -53,9 +53,15 @@ struct ProfileView: View {
                             VStack(spacing: 4) {
                                 Text(profile?.fullName ?? "Usuario")
                                     .font(.system(size: 24, weight: .bold))
-                                Text("Miembro Premium") 
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Theme.primary)
+                                if profile?.isPremium == true {
+                                    Text("Miembro Premium") 
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(Theme.primary)
+                                } else {
+                                    Text("Miembro Estándar")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                         .padding(.top, 20)
@@ -125,10 +131,9 @@ struct ProfileView: View {
     }
     
     private func loadProfile() {
-        isLoading = true
         SupabaseManager.shared.fetchProfile { result in
             DispatchQueue.main.async {
-                isLoading = false
+                self.isLoading = false
                 switch result {
                 case .success(let data):
                     self.profile = data
