@@ -176,15 +176,14 @@ struct ProfileStatItem: View {
         VStack(spacing: 4) {
             Text(value)
                 .font(Theme.Typography.title3)
+                .foregroundColor(Theme.deepBlack)
             Text(title)
                 .font(Theme.Typography.caption)
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
 }
 

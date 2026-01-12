@@ -1,5 +1,40 @@
 import SwiftUI
 
+// MARK: - Modern Design Shared Components
+
+struct ModernCardBackground: View {
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 35)
+                .fill(Color.white)
+                .overlay(
+                    ZStack {
+                        // Blobs de colores pastel difuminados (Refined for general use)
+                        Circle()
+                            .fill(Color(hex: "60A5FA").opacity(0.15)) // Blue
+                            .frame(width: 300, height: 300)
+                            .offset(x: 120, y: -80)
+                            .blur(radius: 60)
+                        
+                        Circle()
+                            .fill(Color(hex: "F472B6").opacity(0.12)) // Pink
+                            .frame(width: 250, height: 250)
+                            .offset(x: -60, y: 100)
+                            .blur(radius: 50)
+                        
+                        Circle()
+                            .fill(Theme.primary.opacity(0.1)) // Green
+                            .frame(width: 220, height: 220)
+                            .offset(x: 100, y: 80)
+                            .blur(radius: 40)
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 35))
+                .shadow(color: Color.black.opacity(0.04), radius: 20, x: 0, y: 10)
+        }
+    }
+}
+
 struct ProductCard: View {
     let title: String
     let price: Double
@@ -14,7 +49,6 @@ struct ProductCard: View {
                 RoundedRectangle(cornerRadius: 24)
                     .fill(Color.white)
                     .frame(height: 170)
-                    .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 6)
                     .overlay(
                         GeometryReader { geo in
                             Group {
@@ -62,7 +96,6 @@ struct ProductCard: View {
                             .foregroundColor(.white)
                             .padding(10)
                             .background(Circle().fill(Color.black))
-                            .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 3)
                     }
                     .padding(12)
                     .buttonStyle(PlainButtonStyle())
@@ -72,22 +105,24 @@ struct ProductCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 if let brand = brand {
                     Text(brand.uppercased())
-                        .font(.system(size: 10, weight: .black))
+                        .font(Theme.Typography.subheadline)
                         .kerning(1.2)
                         .foregroundColor(Theme.primary)
                 }
                 
                 Text(title)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(Color(hex: "1A1A1A"))
+                    .font(Theme.Typography.body)
+                    .foregroundColor(Theme.deepBlack)
                     .lineLimit(1)
                 
                 Text("$\(Int(price))")
-                    .font(.system(size: 17, weight: .black))
-                    .foregroundColor(Color(hex: "1A1A1A"))
+                    .font(Theme.Typography.title3)
+                    .foregroundColor(Theme.deepBlack)
             }
             .padding(.horizontal, 6)
         }
+        .padding(12)
+        .background(ModernCardBackground())
     }
     
     private var placeholderImage: some View {
@@ -135,7 +170,7 @@ struct CaddieCard: View {
                     Image(systemName: "star.fill")
                         .foregroundColor(Theme.accent)
                     Text("\(rating, specifier: "%.1f")")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(Theme.Typography.caption)
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
@@ -146,19 +181,20 @@ struct CaddieCard: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(specialty.uppercased())
-                    .font(.system(size: 10, weight: .bold))
+                    .font(Theme.Typography.caption)
                     .foregroundColor(Theme.primary)
                 
                 Text(name)
-                    .font(.system(size: 16, weight: .bold))
+                    .font(Theme.Typography.body)
+                    .foregroundColor(Theme.deepBlack)
                 
                 Text("HCP \(hcp)")
-                    .font(.system(size: 12))
+                    .font(Theme.Typography.subheadline)
                     .foregroundColor(.secondary)
                 
                 HStack {
                     Text("$\(price) /ronda")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(Theme.Typography.body)
                     Spacer()
                     Button(action: {}) {
                         Image(systemName: "plus")
@@ -173,9 +209,7 @@ struct CaddieCard: View {
             .padding(.horizontal, 4)
         }
         .padding(12)
-        .background(Color.white)
-        .cornerRadius(24)
-        .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+        .background(ModernCardBackground())
     }
     
     private var horizontalBody: some View {
@@ -247,7 +281,7 @@ struct TournamentCard: View {
                         Image(systemName: "calendar")
                         Text(date)
                     }
-                    .font(.system(size: 10, weight: .bold))
+                    .font(Theme.Typography.caption)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(Color.blue.opacity(0.6))
@@ -256,7 +290,7 @@ struct TournamentCard: View {
                     
                     if isFeatured {
                         Text("DESTACADO")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(Theme.Typography.caption)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .background(Theme.primary)
@@ -269,23 +303,25 @@ struct TournamentCard: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 Text("DIVISIÓN PRO")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(Theme.Typography.subheadline)
                     .foregroundColor(Theme.primary)
                 
                 Text(title)
-                    .font(.system(size: 24, weight: .bold))
+                    .font(Theme.Typography.title2)
+                    .foregroundColor(Theme.deepBlack)
                 
                 Text(location)
-                    .font(.system(size: 14))
+                    .font(Theme.Typography.body)
                     .foregroundColor(.secondary)
                 
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("INSCRIPCIÓN")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(Theme.Typography.caption)
                             .foregroundColor(.secondary)
                         Text("$\(fee)")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(Theme.Typography.title3)
+                            .foregroundColor(Theme.deepBlack)
                     }
                     
                     Spacer()
@@ -295,21 +331,19 @@ struct TournamentCard: View {
                             Text("Reservar")
                             Image(systemName: "arrow.right")
                         }
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.black)
+                        .font(Theme.Typography.button)
+                        .foregroundColor(.white)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)
-                        .background(Color.white)
+                        .background(Color.black)
                         .cornerRadius(25)
                     }
                 }
                 .padding(.top, 10)
             }
             .padding(20)
-            .background(Color.black.opacity(0.05))
         }
-        .cornerRadius(24)
-        .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+        .background(ModernCardBackground())
     }
 }
 
@@ -334,7 +368,7 @@ struct StatCard: View {
                 
                 if let trend = trend {
                     Text(trend)
-                        .font(.system(size: 12, weight: .bold))
+                        .font(Theme.Typography.caption)
                         .foregroundColor(Theme.primary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -345,17 +379,16 @@ struct StatCard: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(title.uppercased())
-                    .font(.system(size: 12, weight: .bold))
+                    .font(Theme.Typography.subheadline)
                     .foregroundColor(.secondary)
                 Text(value)
-                    .font(.system(size: 32, weight: .bold))
+                    .font(Theme.Typography.title1)
+                    .foregroundColor(Theme.deepBlack)
             }
         }
-        .padding(20)
+        .padding(25)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
-        .cornerRadius(24)
-        .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+        .background(ModernCardBackground())
     }
 }
 
@@ -377,18 +410,17 @@ struct TipCard: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(Theme.Typography.body)
+                    .foregroundColor(Theme.deepBlack)
                 Text("\(time) lectura")
-                    .font(.system(size: 12))
+                    .font(Theme.Typography.caption)
                     .foregroundColor(.secondary)
             }
             
             Spacer()
         }
         .padding(16)
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+        .background(ModernCardBackground())
     }
 }
 
@@ -403,74 +435,64 @@ struct PromoBannerCard: View {
     
     var body: some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 35)
-                .fill(color)
-                .overlay(
-                    ZStack {
-                        Circle()
-                            .fill(Theme.primary.opacity(0.15))
-                            .frame(width: 250, height: 250)
-                            .offset(x: 150, y: -80)
-                            .blur(radius: 40)
-                        
-                        Circle()
-                            .fill(Color.white.opacity(0.03))
-                            .frame(width: 200, height: 200)
-                            .offset(x: -80, y: 120)
-                    }
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 35))
+            ModernCardBackground()
             
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 14) {
+                    // Tag con estilo moderno y sutil
                     Text(tag.uppercased())
-                        .font(.system(size: 11, weight: .black))
+                        .font(Theme.Typography.caption)
                         .kerning(1.2)
-                        .foregroundColor(Theme.primary)
+                        .foregroundColor(Theme.deepBlack)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.08))
+                        .background(Color.white.opacity(0.4))
                         .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                        )
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text(title)
-                            .font(.system(size: 28, weight: .black))
-                            .foregroundColor(.white)
+                            .font(Theme.Typography.title2)
+                            .foregroundColor(Theme.deepBlack)
                             .lineLimit(2)
                         
                         Text(price)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white.opacity(0.7))
+                            .font(Theme.Typography.title3)
+                            .foregroundColor(Theme.deepBlack.opacity(0.6))
                     }
                     
-                    Button(action: {}) {
+                    // Botón con alto contraste y diseño premium
+                    Button(action: {
+                        let generator = UIImpactFeedbackGenerator(style: .medium)
+                        generator.impactOccurred()
+                    }) {
                         HStack(spacing: 8) {
                             Text("Comprar Ahora")
                             Image(systemName: "chevron.right")
                         }
-                        .font(.system(size: 13, weight: .black))
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(Color.white)
-                        .cornerRadius(15)
+                        .font(Theme.Typography.button)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 22)
+                        .padding(.vertical, 14)
+                        .background(Theme.deepBlack)
+                        .cornerRadius(18)
                     }
                     .padding(.top, 5)
                 }
-                .padding(30)
+                .padding(32)
                 
                 Spacer()
                 
-                ZStack {
-                    Image(systemName: imageName)
-                        .font(.system(size: 110))
-                        .foregroundColor(.white.opacity(0.12))
-                        .rotationEffect(.degrees(-10))
-                        .offset(x: 20, y: 10)
-                }
+                Image(systemName: imageName)
+                    .font(.system(size: 120))
+                    .foregroundColor(Theme.deepBlack.opacity(0.07))
+                    .rotationEffect(.degrees(-15))
+                    .offset(x: 10, y: 15)
             }
         }
-        .shadow(color: color.opacity(0.3), radius: 25, x: 0, y: 15)
     }
 }
 
@@ -507,8 +529,8 @@ struct QuickActionCard: View {
                 }
                 
                 Text(title)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(Color(hex: "1A1A1A"))
+                    .font(Theme.Typography.body)
+                    .foregroundColor(Theme.deepBlack)
             }
         }
         .scaleEffect(isPressed ? 0.94 : 1)
@@ -538,12 +560,13 @@ struct PlayActionCard: View {
                             .frame(width: 10, height: 10)
                             .shadow(color: Theme.primary.opacity(0.5), radius: 4, x: 0, y: 0)
                         Text("ESTADO DEL CAMPO")
-                            .font(.system(size: 12, weight: .black))
+                            .font(Theme.Typography.subheadline)
                             .kerning(1.2)
                             .foregroundColor(Theme.primary)
                     }
                     Text("Listo para Jugar")
-                        .font(.system(size: 32, weight: .black))
+                        .font(Theme.Typography.title1)
+                        .foregroundColor(Theme.deepBlack)
                 }
                 Spacer()
                 ZStack {
@@ -569,7 +592,7 @@ struct PlayActionCard: View {
             }) {
                 HStack(spacing: 12) {
                     Text("EMPEZAR RONDA")
-                        .font(.system(size: 17, weight: .black))
+                        .font(Theme.Typography.button)
                         .kerning(1.0)
                     Image(systemName: "play.fill")
                         .font(.system(size: 14))
@@ -589,11 +612,7 @@ struct PlayActionCard: View {
             }
         }
         .padding(30)
-        .background(
-            RoundedRectangle(cornerRadius: 40)
-                .fill(Color.white)
-                .shadow(color: .black.opacity(0.06), radius: 30, x: 0, y: 15)
-        )
+        .background(ModernCardBackground())
         .scaleEffect(isPressed ? 0.97 : 1)
         .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
             withAnimation(.easeInOut(duration: 0.15)) {

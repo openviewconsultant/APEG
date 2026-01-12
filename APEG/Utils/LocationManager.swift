@@ -1,3 +1,5 @@
+import CoreLocation
+import SwiftUI
 import Combine
 import MapKit
 
@@ -14,9 +16,23 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
-        locationManager.startUpdatingHeading()
+        locationManager.distanceFilter = 10 // Only update if moved 10 meters
+        
+        // Check current status
+        checkAuthorizationStatus()
+    }
+    
+    private func checkAuthorizationStatus() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedWhenInUse, .authorizedAlways:
+            isAuthorized = true
+            locationManager.startUpdatingLocation()
+        default:
+            isAuthorized = false
+            self.cityName = "Acceso Denegado"
+        }
     }
 
     func requestPermission() {
@@ -32,23 +48,25 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     private func reverseGeocode(location: CLLocation) {
-        if #available(iOS 18.0, *) {
-            let request = MKReverseGeocodingRequest(coordinate: location.coordinate)
-            Task {
-                do {
-                    let response = try await request.response
-                    if let placemark = response.placemarks.first {
-                        self.processPlacemark(placemark)
-                    }
-                } catch {
-                    print("MapKit Geocoding Error: \(error.localizedDescription)")
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Geocoding Error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.cityName = "Ubicación Desconocida"
                 }
+                return
             }
-        } else {
-            geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
-                guard let self = self, let placemark = placemarks?.first else { return }
-                self.processPlacemark(placemark)
+            
+            guard let placemark = placemarks?.first else {
+                DispatchQueue.main.async {
+                    self.cityName = "Ubicación Desconocida"
+                }
+                return
             }
+            
+            self.processPlacemark(placemark)
         }
     }
     
@@ -74,13 +92,15 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            isAuthorized = true
-            locationManager.startUpdatingLocation()
-        default:
-            isAuthorized = false
-            locationManager.stopUpdatingLocation()
+        checkAuthorizationStatus()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location Manager Error: \(error.localizedDescription)")
+        DispatchQueue.main.async {
+            if self.cityName == "Detectando..." {
+                self.cityName = "Error de Ubicación"
+            }
         }
     }
 }

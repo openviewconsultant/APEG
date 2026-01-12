@@ -62,6 +62,13 @@ struct MainTabView: View {
                 }
             }
         }
+        .onChange(of: locationManager.isAuthorized) { oldAuth, isAuthorized in
+            if isAuthorized, let location = locationManager.location {
+                Task {
+                    await weatherManager.fetchWeather(for: location)
+                }
+            }
+        }
     }
     
     private var customTabBar: some View {

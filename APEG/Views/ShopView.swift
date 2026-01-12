@@ -21,7 +21,7 @@ struct ShopView: View {
                     HStack {
                         Text("Tienda Pro")
                             .font(Theme.Typography.largeTitle)
-                            .foregroundColor(Color(hex: "1A1A1A"))
+                            .foregroundColor(Theme.deepBlack)
                         Spacer()
                         
                         if isPremium {

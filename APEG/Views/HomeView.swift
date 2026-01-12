@@ -98,7 +98,7 @@ struct HomeView: View {
                         .foregroundColor(.secondary.opacity(0.8))
                     Text(profile?.fullName?.components(separatedBy: " ").first ?? "Edgar")
                         .font(Theme.Typography.title2)
-                        .foregroundColor(Color(hex: "1A1A1A"))
+                        .foregroundColor(Theme.deepBlack)
                 }
             }
             
@@ -112,7 +112,7 @@ struct HomeView: View {
                             .foregroundColor(.orange)
                         Text(weatherManager.temperature)
                             .font(Theme.Typography.title2)
-                            .foregroundColor(Color(hex: "1A1A1A"))
+                            .foregroundColor(Theme.deepBlack)
                     }
                     Text(locationManager.cityName)
                         .font(Theme.Typography.caption)

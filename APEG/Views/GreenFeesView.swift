@@ -6,7 +6,7 @@ struct GreenFeesView: View {
             VStack(alignment: .leading, spacing: 24) {
                 Text("Reservar Green Fee")
                     .font(Theme.Typography.largeTitle)
-                    .foregroundColor(Color(hex: "1A1A1A"))
+                    .foregroundColor(Theme.deepBlack)
                     .padding(.horizontal, 25)
                 
                 VStack(spacing: 25) {
@@ -21,9 +21,7 @@ struct GreenFeesView: View {
                         Spacer()
                     }
                     .padding(18)
-                    .background(Color.white)
-                    .cornerRadius(18)
-                    .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 5)
+                    .background(ModernCardBackground())
                     .padding(.horizontal, 25)
                     
                     // Filter Chips
@@ -38,10 +36,10 @@ struct GreenFeesView: View {
                     
                     // Featured Courses
                     VStack(alignment: .leading, spacing: 20) {
-                        Text("Campos Recomendados")
-                            .font(.system(size: 20, weight: .black))
-                            .foregroundColor(Color(hex: "1A1A1A"))
-                            .padding(.horizontal, 25)
+                    Text("Campos Recomendados")
+                        .font(Theme.Typography.title3)
+                        .foregroundColor(Theme.deepBlack)
+                        .padding(.horizontal, 25)
                         
                         ForEach(0..<3) { _ in
                             CourseCard()
@@ -100,25 +98,24 @@ struct CourseCard: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("Pebble Beach Golf Links")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(Theme.Typography.body)
+                    .foregroundColor(Theme.deepBlack)
                 
                 HStack {
                     Image(systemName: "mappin.and.ellipse")
                     Text("San Francisco, CA")
                     Spacer()
                     Text("desde $250")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(Theme.Typography.body)
                         .foregroundColor(Theme.primary)
                 }
-                .font(.system(size: 14))
+                .font(Theme.Typography.caption)
                 .foregroundColor(.secondary)
             }
             .padding(.horizontal, 8)
         }
         .padding(12)
-        .background(Color.white)
-        .cornerRadius(32)
-        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
 }
 

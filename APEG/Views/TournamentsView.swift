@@ -13,7 +13,7 @@ struct TournamentsView: View {
                     HStack {
                         Text("Torneos")
                             .font(Theme.Typography.largeTitle)
-                            .foregroundColor(Color(hex: "1A1A1A"))
+                            .foregroundColor(Theme.deepBlack)
                         Spacer()
                         Button(action: {}) {
                             Image(systemName: "magnifyingglass")
@@ -92,15 +92,13 @@ struct TournamentsView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 14)
-                            .background(Color.black)
+                            .background(Theme.deepBlack)
                             .cornerRadius(15)
                             .padding(.top, 5)
                         }
                         .padding(25)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white)
-                        .cornerRadius(32)
-                        .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
+                        .background(ModernCardBackground())
                         
                         VStack(alignment: .leading, spacing: 15) {
                             HStack {
@@ -117,6 +115,7 @@ struct TournamentsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(weatherManager.condition)
                                     .font(Theme.Typography.title2)
+                                    .foregroundColor(Theme.deepBlack)
                                 Text("\(weatherManager.temperature) • Vientos 8km/h")
                                     .font(Theme.Typography.caption)
                                     .foregroundColor(.secondary)
@@ -124,9 +123,7 @@ struct TournamentsView: View {
                         }
                         .padding(25)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.white)
-                        .cornerRadius(32)
-                        .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
+                        .background(ModernCardBackground())
                     }
                     .padding(.horizontal, 20)
                 }
