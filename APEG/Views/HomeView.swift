@@ -13,48 +13,49 @@ struct HomeView: View {
                 PlayActionCard() {
                     showPlayView = true
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
                 
                 // Quick Actions Grid
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     Text("EXPLORAR")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
+                        .font(Theme.Typography.headline)
+                        .kerning(1.2)
+                        .foregroundColor(.secondary.opacity(0.7))
+                        .padding(.horizontal, 25)
                     
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
                         QuickActionCard(title: "Reservar", icon: "calendar.badge.plus", color: .green) { }
-                        QuickActionCard(title: "Torneos", icon: "trophy", color: .orange) { }
-                        QuickActionCard(title: "Tienda", icon: "bag", color: .blue) { }
+                        QuickActionCard(title: "Torneos", icon: "trophy.fill", color: .orange) { }
+                        QuickActionCard(title: "Tienda", icon: "bag.fill", color: .blue) { }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 }
                 
                 adBanner
                 
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     HStack {
                         Text("Pro Tips")
-                            .font(.system(size: 20, weight: .bold))
+                            .font(Theme.Typography.title3)
                         Spacer()
                         Button("Ver Todo") {
                         }
-                        .font(.system(size: 14, weight: .bold))
+                        .font(Theme.Typography.button)
                         .foregroundColor(Theme.primary)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 25)
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
                             TipCard(title: "Swing Tempo", time: "3 min", iconName: "circle.hexagongrid.fill", color: Theme.primary)
                             TipCard(title: "Mental Game", time: "5 min", iconName: "brain.head.profile", color: .orange)
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         .padding(.bottom, 120) // Space for tab bar
                     }
                 }
             }
-            .padding(.vertical)
+            .padding(.vertical, 10)
         }
         .background(Color(hex: "F8F9FA").ignoresSafeArea())
         .fullScreenCover(isPresented: $showPlayView) {
@@ -73,48 +74,57 @@ struct HomeView: View {
     
     private var headerSection: some View {
         HStack {
-            HStack(spacing: 12) {
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(width: 50, height: 50)
-                    .overlay(Image(systemName: "person.fill").foregroundColor(.gray))
+            HStack(spacing: 15) {
+                ZStack {
+                    Circle()
+                        .fill(Color.gray.opacity(0.1))
+                        .frame(width: 54, height: 54)
+                    Image(systemName: "person.fill")
+                        .font(.title2)
+                        .foregroundColor(.gray.opacity(0.5))
+                }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("BUENOS DÍAS")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.secondary)
-                    // Display fetched first name or Default
-                    Text(profile?.fullName?.components(separatedBy: " ").first ?? "Golfista")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(Theme.Typography.subheadline)
+                        .kerning(1.0)
+                        .foregroundColor(.secondary.opacity(0.8))
+                    Text(profile?.fullName?.components(separatedBy: " ").first ?? "Edgar")
+                        .font(Theme.Typography.title2)
+                        .foregroundColor(Color(hex: "1A1A1A"))
                 }
             }
             
             Spacer()
             
-            HStack(spacing: 16) {
+            HStack(spacing: 18) {
                 VStack(alignment: .trailing, spacing: 2) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 6) {
                         Image(systemName: "sun.max.fill")
+                            .font(.system(size: 18))
                             .foregroundColor(.orange)
                         Text("22°C")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(Theme.Typography.title2) // Using title2 for temperature to match design weight
+                            .foregroundColor(Color(hex: "1A1A1A"))
                     }
                     Text("Pebble Beach, CA")
-                        .font(.system(size: 10))
+                        .font(Theme.Typography.caption)
                         .foregroundColor(.secondary)
                 }
                 
                 Button(action: {}) {
                     Image(systemName: "bell.fill")
+                        .font(.system(size: 20))
                         .foregroundColor(.black)
-                        .padding(12)
+                        .padding(14)
                         .background(Color.white)
                         .clipShape(Circle())
-                        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
                 }
             }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
     }
     
     private var featuredEventCard: some View {
@@ -131,7 +141,7 @@ struct HomeView: View {
                     HStack(spacing: 4) {
                         Circle().fill(Theme.primary).frame(width: 6, height: 6)
                         Text("Registrado")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(Theme.Typography.caption)
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
@@ -151,18 +161,18 @@ struct HomeView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("OCT 12-14")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(Theme.Typography.caption)
                         .foregroundColor(Theme.primary)
                     
                     Text("Campeonato del Club")
-                        .font(.system(size: 32, weight: .bold))
+                        .font(Theme.Typography.title1)
                         .foregroundColor(.white)
                     
                     HStack(spacing: 4) {
                         Image(systemName: "mappin.and.ellipse")
                         Text("Pebble Beach Links")
                     }
-                    .font(.system(size: 14))
+                    .font(Theme.Typography.body)
                     .foregroundColor(.white.opacity(0.8))
                 }
             }

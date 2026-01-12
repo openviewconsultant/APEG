@@ -40,11 +40,11 @@ struct ProfileView: View {
                                     // In a real app we would load the image from URL.
                                     // For now, we fall back to initials.
                                     Text(getInitials(name: profile?.fullName))
-                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                        .font(Font.system(size: 34, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
                                 } else {
                                     Text(getInitials(name: profile?.fullName))
-                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                        .font(Font.system(size: 34, weight: .bold, design: .rounded))
                                         .foregroundColor(.white)
                                 }
                             }
@@ -52,14 +52,14 @@ struct ProfileView: View {
                             
                             VStack(spacing: 4) {
                                 Text(profile?.fullName ?? "Usuario")
-                                    .font(.system(size: 24, weight: .bold))
+                                    .font(Theme.Typography.title2)
                                 if profile?.isPremium == true {
                                     Text("Miembro Premium") 
-                                        .font(.system(size: 14, weight: .semibold))
+                                        .font(Theme.Typography.button)
                                         .foregroundColor(Theme.primary)
                                 } else {
                                     Text("Miembro Estándar")
-                                        .font(.system(size: 14, weight: .medium))
+                                        .font(Theme.Typography.body)
                                         .foregroundColor(.secondary)
                                 }
                             }
@@ -74,11 +74,11 @@ struct ProfileView: View {
                         ProfileStatItem(title: "Rondas", value: "128")
                         ProfileStatItem(title: "Torneos", value: "12")
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 25)
                     
                     // Menu Sections
-                    VStack(spacing: 20) {
-                        ProfileMenuSection(title: "Mi Juego") {
+                    VStack(spacing: 30) {
+                        ProfileMenuSection(title: "MI JUEGO") {
                             NavigationLink(destination: GameStatsView()) {
                                 ProfileMenuRowContent(icon: "figure.golf", title: "Estadísticas de Juego", color: .blue)
                             }
@@ -87,16 +87,24 @@ struct ProfileView: View {
                                 .opacity(0.5)
                             
                             ProfileMenuRow(icon: "trophy", title: "Mis Torneos", color: .orange)
+                            
+                            Divider()
+                                .padding(.leading, 68)
+                                .opacity(0.5)
+                            
+                            NavigationLink(destination: MyOrdersView()) {
+                                ProfileMenuRowContent(icon: "bag", title: "Mis Pedidos", color: .green)
+                            }
                         }
                         
-                        ProfileMenuSection(title: "Cuenta") {
+                        ProfileMenuSection(title: "CUENTA") {
                              NavigationLink(destination: PersonalDataView()) {
                                  ProfileMenuRowContent(icon: "person", title: "Datos Personales", color: .gray)
                              }
                              Divider()
                                  .padding(.leading, 68)
                                  .opacity(0.5)
-
+ 
                             ProfileMenuRow(icon: "creditcard", title: "Métodos de Pago", color: .purple)
                             ProfileMenuRow(icon: "bell", title: "Notificaciones", color: .red)
                         }
@@ -108,15 +116,15 @@ struct ProfileView: View {
                             HStack {
                                 Image(systemName: "rectangle.portrait.and.arrow.right")
                                 Text("Cerrar Sesión")
-                                    .fontWeight(.bold)
+                                    .font(Theme.Typography.button)
                             }
                             .foregroundColor(.red)
                             .frame(maxWidth: .infinity)
-                            .padding()
+                            .padding(.vertical, 18)
                             .background(Color.red.opacity(0.1))
-                            .cornerRadius(16)
+                            .cornerRadius(20)
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 25)
                         .padding(.top, 10)
                     }
                 }
@@ -125,8 +133,14 @@ struct ProfileView: View {
             .background(Color(hex: "F8F9FA").ignoresSafeArea())
             .navigationBarHidden(true)
             .onAppear {
-                loadProfile()
+                checkProfile()
             }
+        }
+    }
+    
+    private func checkProfile() {
+        if profile == nil {
+            loadProfile()
         }
     }
     
@@ -161,16 +175,16 @@ struct ProfileStatItem: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.system(size: 20, weight: .bold))
+                .font(Theme.Typography.title3)
             Text(title)
-                .font(.system(size: 12))
+                .font(Theme.Typography.caption)
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, 18)
         .background(Color.white)
         .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -184,19 +198,20 @@ struct ProfileMenuSection<Content: View>: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 15) {
             Text(title)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 24)
+                .font(Theme.Typography.headline)
+                .kerning(1.2)
+                .foregroundColor(.secondary.opacity(0.7))
+                .padding(.horizontal, 30)
             
             VStack(spacing: 0) {
                 content
             }
             .background(Color.white)
             .cornerRadius(24)
-            .padding(.horizontal)
-            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 25)
+            .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
         }
     }
 }
@@ -229,17 +244,17 @@ struct ProfileMenuRowContent: View {
                         .frame(width: 36, height: 36)
                     Image(systemName: icon)
                         .foregroundColor(color)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(Theme.Typography.body)
                 }
                 
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(Theme.Typography.body)
                     .foregroundColor(.primary)
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(Theme.Typography.button)
                     .foregroundColor(.gray.opacity(0.4))
             }
             .padding(.horizontal, 16)

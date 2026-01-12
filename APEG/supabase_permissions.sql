@@ -35,3 +35,55 @@ CREATE POLICY "Premium users can update products" ON public.products
 
 -- 3. Helper to make a specific user premium (Replace with a real UUID if needed)
 -- UPDATE public.profiles SET is_premium = true WHERE id = 'YOUR_USER_ID_HERE';
+
+-- 4. Storage Bucket Policies for Product Images
+-- First, create the bucket manually in Supabase Dashboard: Storage > New Bucket > "product-images"
+-- Then run these policies:
+
+-- Enable RLS on storage.objects
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Anyone can view product images (public read)
+DROP POLICY IF EXISTS "Public can view product images" ON storage.objects;
+CREATE POLICY "Public can view product images" ON storage.objects
+    FOR SELECT
+    USING (bucket_id = 'product-images');
+
+-- Policy: Premium users can upload product images
+DROP POLICY IF EXISTS "Premium users can upload product images" ON storage.objects;
+CREATE POLICY "Premium users can upload product images" ON storage.objects
+    FOR INSERT
+    WITH CHECK (
+        bucket_id = 'product-images' AND
+        EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() 
+            AND is_premium = true
+        )
+    );
+
+-- Policy: Premium users can update their uploaded images
+DROP POLICY IF EXISTS "Premium users can update product images" ON storage.objects;
+CREATE POLICY "Premium users can update product images" ON storage.objects
+    FOR UPDATE
+    USING (
+        bucket_id = 'product-images' AND
+        EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() 
+            AND is_premium = true
+        )
+    );
+
+-- Policy: Premium users can delete product images
+DROP POLICY IF EXISTS "Premium users can delete product images" ON storage.objects;
+CREATE POLICY "Premium users can delete product images" ON storage.objects
+    FOR DELETE
+    USING (
+        bucket_id = 'product-images' AND
+        EXISTS (
+            SELECT 1 FROM public.profiles
+            WHERE id = auth.uid() 
+            AND is_premium = true
+        )
+    );

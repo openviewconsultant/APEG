@@ -13,6 +13,18 @@ struct Theme {
         static let soft = ShadowConfig(color: .black.opacity(0.08), radius: 15, x: 0, y: 8)
         static let medium = ShadowConfig(color: .black.opacity(0.12), radius: 20, x: 0, y: 10)
     }
+    
+    struct Typography {
+        static let largeTitle = Font.system(size: 34, weight: .black)
+        static let title1 = Font.system(size: 32, weight: .bold)
+        static let title2 = Font.system(size: 24, weight: .black)
+        static let title3 = Font.system(size: 22, weight: .black)
+        static let headline = Font.system(size: 13, weight: .black)
+        static let body = Font.system(size: 14, weight: .bold)
+        static let subheadline = Font.system(size: 11, weight: .black)
+        static let caption = Font.system(size: 11, weight: .bold)
+        static let button = Font.system(size: 14, weight: .black)
+    }
 }
 
 struct ShadowConfig {

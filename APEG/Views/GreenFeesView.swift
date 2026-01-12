@@ -5,23 +5,26 @@ struct GreenFeesView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 Text("Reservar Green Fee")
-                    .font(.system(size: 34, weight: .bold))
-                    .padding(.horizontal)
+                    .font(Theme.Typography.largeTitle)
+                    .foregroundColor(Color(hex: "1A1A1A"))
+                    .padding(.horizontal, 25)
                 
-                VStack(spacing: 20) {
+                VStack(spacing: 25) {
                     // Quick Search Component
                     HStack {
                         Image(systemName: "magnifyingglass")
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.gray)
                         Text("¿Dónde quieres jugar?")
+                            .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.gray)
                         Spacer()
                     }
-                    .padding()
+                    .padding(18)
                     .background(Color.white)
-                    .cornerRadius(15)
-                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    .padding(.horizontal)
+                    .cornerRadius(18)
+                    .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 5)
+                    .padding(.horizontal, 25)
                     
                     // Filter Chips
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -30,24 +33,25 @@ struct GreenFeesView: View {
                             FilterChip(title: "Top Rated", icon: "star.fill", isSelected: false)
                             FilterChip(title: "Ofertas", icon: "tag.fill", isSelected: false)
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 25)
                     }
                     
                     // Featured Courses
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 20) {
                         Text("Campos Recomendados")
-                            .font(.system(size: 20, weight: .bold))
-                            .padding(.horizontal)
+                            .font(.system(size: 20, weight: .black))
+                            .foregroundColor(Color(hex: "1A1A1A"))
+                            .padding(.horizontal, 25)
                         
                         ForEach(0..<3) { _ in
                             CourseCard()
-                                .padding(.horizontal)
+                                .padding(.horizontal, 22)
                         }
                     }
                 }
             }
-            .padding(.vertical)
-            .padding(.bottom, 100)
+            .padding(.vertical, 10)
+            .padding(.bottom, 120)
         }
         .background(Color(hex: "F8F9FA").ignoresSafeArea())
     }

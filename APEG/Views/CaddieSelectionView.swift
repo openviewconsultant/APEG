@@ -27,7 +27,8 @@ struct CaddieSelectionView: View {
                     .padding(.horizontal)
                     
                     Text("Caddies Disponibles")
-                        .font(.system(size: 20, weight: .bold))
+                        .font(Theme.Typography.title3)
+                        .foregroundColor(Color(hex: "1A1A1A"))
                         .padding(.horizontal)
                     
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
@@ -91,7 +92,8 @@ struct CaddieSelectionView: View {
             Spacer()
             
             Text("Seleccionar Caddie")
-                .font(.system(size: 18, weight: .bold))
+                .font(Theme.Typography.title3)
+                .foregroundColor(Color(hex: "1A1A1A"))
             
             Spacer()
             
@@ -115,10 +117,11 @@ struct CaddieSelectionView: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text("UBICACIÓN Y HORA")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(Theme.Typography.caption)
                     .foregroundColor(.secondary)
                 Text("Pebble Beach • Mañana, 8:00 AM")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(Theme.Typography.body)
+                    .foregroundColor(Color(hex: "1A1A1A"))
             }
             
             Spacer()

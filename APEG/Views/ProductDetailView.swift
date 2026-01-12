@@ -1,27 +1,42 @@
 import SwiftUI
 
 struct ProductDetailView: View {
-    @State private var selectedColor = 0
-    let colors = [Color.red, Color.green, Color.black]
-    let colorNames = ["Stealth Red", "Emerald Green", "Midnight Black"]
+    let product: Product
+    @State private var quantity = 1
+    @State private var showAddedToCart = false
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         VStack(spacing: 0) {
             ZStack(alignment: .top) {
-                // Image Gallery Placeholder
-                Rectangle()
-                    .fill(Color.gray.opacity(0.1))
-                    .frame(height: 400)
-                    .overlay(
-                        VStack {
-                            Image(systemName: "figure.golf")
-                                .font(.system(size: 150))
-                                .foregroundColor(.black.opacity(0.1))
+                // Image
+                Group {
+                    if let urlString = product.imageUrl, let url = URL(string: urlString) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                                    .frame(height: 400)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(height: 400)
+                                    .clipped()
+                            case .failure:
+                                placeholderImage
+                            @unknown default:
+                                placeholderImage
+                            }
                         }
-                    )
+                    } else {
+                        placeholderImage
+                    }
+                }
+                .frame(height: 400)
                 
                 HStack {
-                    Button(action: {}) {
+                    Button(action: { presentationMode.wrappedValue.dismiss() }) {
                         Image(systemName: "arrow.left")
                             .foregroundColor(.white)
                             .padding(12)
@@ -30,39 +45,9 @@ struct ProductDetailView: View {
                     }
                     
                     Spacer()
-                    
-                    HStack(spacing: 12) {
-                        Button(action: {}) {
-                            Image(systemName: "heart")
-                                .foregroundColor(.white)
-                                .padding(12)
-                                .background(Color.black.opacity(0.3))
-                                .clipShape(Circle())
-                        }
-                        
-                        Button(action: {}) {
-                            Image(systemName: "square.and.arrow.up")
-                                .foregroundColor(.white)
-                                .padding(12)
-                                .background(Color.black.opacity(0.3))
-                                .clipShape(Circle())
-                        }
-                    }
                 }
                 .padding()
-                
-                VStack {
-                    Spacer()
-                    HStack(spacing: 8) {
-                        ForEach(0..<3) { index in
-                            Circle()
-                                .fill(index == 0 ? Color.white : Color.white.opacity(0.5))
-                                .frame(width: index == 0 ? 20 : 6, height: 6)
-                        }
-                    }
-                    .padding(.bottom, 20)
-                }
-                .frame(height: 400)
+                .padding(.top, 40)
             }
             
             ScrollView {
@@ -70,34 +55,26 @@ struct ProductDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("TAYLORMADE")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(Theme.primary)
+                                if let brand = product.brand {
+                                    Text(brand.uppercased())
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundColor(Theme.primary)
+                                }
                                 
-                                Text("Stealth 2 Plus\nDriver")
+                                Text(product.name)
                                     .font(.system(size: 32, weight: .bold))
                             }
                             
                             Spacer()
                             
                             VStack(alignment: .trailing, spacing: 4) {
-                                Text("$599")
+                                Text("$\(Int(product.price))")
                                     .font(.system(size: 28, weight: .bold))
                                     .foregroundColor(Theme.primary)
-                                
-                                HStack(spacing: 4) {
-                                    Image(systemName: "star.fill")
-                                        .foregroundColor(Theme.accent)
-                                    Text("4.9")
-                                        .font(.system(size: 12, weight: .bold))
-                                    Text("(128)")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
-                                }
                             }
                         }
                         
-                        Text("Diseñado con una cara de torsión de carbono de 60X para un rendimiento más ligero, rápido y tolerante.")
+                        Text(product.description ?? "No hay descripción disponible para este producto.")
                             .font(.system(size: 16))
                             .foregroundColor(.secondary)
                             .lineSpacing(4)
@@ -105,43 +82,25 @@ struct ProductDetailView: View {
                     .padding(.horizontal)
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        Text(colorNames[selectedColor])
-                            .font(.system(size: 14, weight: .bold))
-                        
-                        HStack(spacing: 16) {
-                            ForEach(0..<colors.count, id: \.self) { index in
-                                Circle()
-                                    .fill(colors[index])
-                                    .frame(width: 44, height: 44)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(Color.black, lineWidth: selectedColor == index ? 2 : 0)
-                                            .padding(-4)
-                                    )
-                                    .onTapGesture {
-                                        selectedColor = index
-                                    }
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Descripción")
+                        Text("Detalles del Producto")
                             .font(.system(size: 18, weight: .bold))
                         
-                        Text("El Stealth 2 Plus conserva la cara de torsión de carbono 60X pero agrega un nuevo anillo compuesto reforzado con carbono para mayor durabilidad. La pista de peso deslizante le permite ajustar la forma de su tiro preferida, desde fade hasta draw, brindándole una personalización de nivel de tour.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                            .lineSpacing(6)
-                        
-                        Button(action: {}) {
-                            HStack {
-                                Text("Leer especificaciones completas")
-                                Image(systemName: "arrow.right")
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Categoría")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text(product.category ?? "General")
+                                    .font(.body)
                             }
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Theme.primary)
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("Disponibilidad")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Text("\(product.stockQuantity ?? 0) uds")
+                                    .font(.body)
+                            }
                         }
                     }
                     .padding(24)
@@ -149,41 +108,6 @@ struct ProductDetailView: View {
                     .cornerRadius(32)
                     .padding(.horizontal)
                     .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
-                    
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Completa el Look")
-                            .font(.system(size: 18, weight: .bold))
-                            .padding(.horizontal)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
-                                VStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.gray.opacity(0.1))
-                                        .frame(width: 140, height: 140)
-                                        .overlay(Image(systemName: "tshirt").font(.largeTitle).foregroundColor(.gray))
-                                    Text("Tour Polo")
-                                        .font(.system(size: 14, weight: .bold))
-                                    Text("$85.00")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(Theme.primary)
-                                }
-                                
-                                VStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.gray.opacity(0.1))
-                                        .frame(width: 140, height: 140)
-                                        .overlay(Image(systemName: "hat.cap").font(.largeTitle).foregroundColor(.gray))
-                                    Text("Performance Cap")
-                                        .font(.system(size: 14, weight: .bold))
-                                    Text("$35.00")
-                                        .font(.system(size: 14))
-                                        .foregroundColor(Theme.primary)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
                 }
                 .padding(.vertical)
             }
@@ -191,27 +115,38 @@ struct ProductDetailView: View {
             // Bottom Bar
             HStack(spacing: 20) {
                 HStack(spacing: 20) {
-                    Button(action: {}) { Image(systemName: "minus") }
-                    Text("1")
+                    Button(action: { if quantity > 1 { quantity -= 1 } }) { Image(systemName: "minus") }
+                    Text("\(quantity)")
                         .font(.system(size: 18, weight: .bold))
-                    Button(action: {}) { Image(systemName: "plus") }
+                        .frame(width: 30)
+                    Button(action: { quantity += 1 }) { Image(systemName: "plus") }
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 14)
                 .background(Color.black.opacity(0.05))
                 .cornerRadius(20)
                 
-                Button(action: {}) {
+                Button(action: {
+                    CartManager.shared.addToCart(product: product, quantity: quantity)
+                    withAnimation {
+                        showAddedToCart = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation {
+                            showAddedToCart = false
+                        }
+                    }
+                }) {
                     HStack {
-                        Text("Añadir al Carrito")
+                        Text(showAddedToCart ? "¡Añadido!" : "Añadir al Carrito")
                         Spacer()
-                        Text("$599")
+                        Text("$\(Int(product.price * Double(quantity)))")
                     }
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 18)
-                    .background(Theme.primary)
+                    .background(showAddedToCart ? Color.green : Theme.primary)
                     .cornerRadius(20)
                 }
             }
@@ -220,9 +155,21 @@ struct ProductDetailView: View {
             .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -5)
         }
         .edgesIgnoringSafeArea(.top)
+        .navigationBarHidden(true)
+    }
+    
+    private var placeholderImage: some View {
+        Rectangle()
+            .fill(Color.gray.opacity(0.1))
+            .frame(height: 400)
+            .overlay(
+                Image(systemName: "figure.golf")
+                    .font(.system(size: 100))
+                    .foregroundColor(.black.opacity(0.1))
+            )
     }
 }
 
 #Preview {
-    ProductDetailView()
+    ProductDetailView(product: Product(id: UUID(), name: "Stealth 2 Plus Driver", brand: "TaylorMade", description: "El mejor driver para tu juego.", price: 599.0, category: "Drivers", imageUrl: nil, stockQuantity: 10))
 }

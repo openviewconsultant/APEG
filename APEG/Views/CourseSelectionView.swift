@@ -40,10 +40,11 @@ struct CourseSelectionView: View {
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(course.name)
-                                .font(.system(size: 16, weight: .bold))
+                                .font(Theme.Typography.body)
+                                .foregroundColor(Color(hex: "1A1A1A"))
                             
                             Text(course.location)
-                                .font(.system(size: 14))
+                                .font(Theme.Typography.caption)
                                 .foregroundColor(.secondary)
                             
                             HStack {

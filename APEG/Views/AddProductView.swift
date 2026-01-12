@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct AddProductView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -11,6 +12,12 @@ struct AddProductView: View {
     @State private var stock = ""
     @State private var isSaving = false
     @State private var errorMessage: String?
+    
+    // Image picker states
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var selectedImage: UIImage?
+    @State private var isUploadingImage = false
+
     
     let categories = ["Bolas", "Palos", "Calzado", "Tecnología", "Accesorios", "Ropa"]
     
@@ -31,7 +38,40 @@ struct AddProductView: View {
                     }
                 }
                 
+                // Sección de Imagen
+                Section(header: Text("Imagen del Producto")) {
+                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                        HStack {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .foregroundColor(.accentColor)
+                            Text(selectedImage == nil ? "Seleccionar Imagen" : "Cambiar Imagen")
+                            Spacer()
+                            if isUploadingImage {
+                                ProgressView()
+                            }
+                        }
+                    }
+                    .onChange(of: selectedPhotoItem) { oldValue, newItem in
+                        Task {
+                            if let data = try? await newItem?.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                selectedImage = uiImage
+                            }
+                        }
+                    }
+                    
+                    // Preview de la imagen
+                    if let image = selectedImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxHeight: 200)
+                            .cornerRadius(8)
+                    }
+                }
+                
                 Section(header: Text("Detalles")) {
+
                     TextField("Cantidad en Stock", text: $stock)
                         .keyboardType(.numberPad)
                     TextEditor(text: $description)
@@ -54,7 +94,7 @@ struct AddProductView: View {
                     Section {
                         Text(error)
                             .foregroundColor(.red)
-                            .font(.caption)
+                            .font(Theme.Typography.caption)
                     }
                 }
                 
@@ -65,7 +105,7 @@ struct AddProductView: View {
                                 .frame(maxWidth: .infinity)
                         } else {
                             Text("Guardar Producto")
-                                .fontWeight(.bold)
+                                .font(Theme.Typography.button)
                                 .frame(maxWidth: .infinity)
                         }
                     }
@@ -95,26 +135,52 @@ struct AddProductView: View {
         
         let stockInt = Int(stock) ?? 0
         
-        // Use SupabaseManager to save (we need to add this method or use a generic one)
-        SupabaseManager.shared.saveProduct(
-            name: name,
-            brand: brand,
-            price: priceDouble,
-            category: category,
-            description: description,
-            stock: stockInt
-        ) { result in
-            DispatchQueue.main.async {
-                isSaving = false
-                switch result {
-                case .success:
-                    presentationMode.wrappedValue.dismiss()
-                case .failure(let error):
-                    errorMessage = "Error al guardar: \(error.localizedDescription)"
+        // Si hay una imagen seleccionada, primero subirla
+        Task {
+            var imageUrl: String? = nil
+            
+            if let image = selectedImage {
+                isUploadingImage = true
+                do {
+                    // Generar un UUID temporal para el producto
+                    let tempProductId = UUID()
+                    imageUrl = try await StorageService.shared.uploadProductImage(image, productId: tempProductId)
+                } catch {
+                    await MainActor.run {
+                        isSaving = false
+                        isUploadingImage = false
+                        errorMessage = "Error al subir la imagen: \(error.localizedDescription)"
+                    }
+                    return
+                }
+                await MainActor.run {
+                    isUploadingImage = false
+                }
+            }
+            
+            // Guardar el producto con la URL de la imagen
+            SupabaseManager.shared.saveProduct(
+                name: name,
+                brand: brand,
+                price: priceDouble,
+                category: category,
+                description: description,
+                stock: stockInt,
+                imageUrl: imageUrl
+            ) { result in
+                DispatchQueue.main.async {
+                    isSaving = false
+                    switch result {
+                    case .success:
+                        presentationMode.wrappedValue.dismiss()
+                    case .failure(let error):
+                        errorMessage = "Error al guardar: \(error.localizedDescription)"
+                    }
                 }
             }
         }
     }
+
 }
 
 #Preview {

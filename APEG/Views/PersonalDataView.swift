@@ -70,8 +70,8 @@ struct PersonalDataView: View {
                             .shadow(color: Theme.primary.opacity(0.3), radius: 15, x: 0, y: 8)
                             
                             Text(profile.fullName ?? "Sin Nombre")
-                                .font(.title2)
-                                .fontWeight(.bold)
+                                .font(Theme.Typography.title2)
+                                .foregroundColor(Color(hex: "1A1A1A"))
                         }
                         .padding(.top, 20)
                         

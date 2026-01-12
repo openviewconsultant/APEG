@@ -516,7 +516,7 @@ class SupabaseManager {
         }.resume()
     }
     
-    func saveProduct(name: String, brand: String, price: Double, category: String, description: String, stock: Int, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+    func saveProduct(name: String, brand: String, price: Double, category: String, description: String, stock: Int, imageUrl: String? = nil, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
         guard let url = URL(string: "\(supabaseURL)/rest/v1/products") else {
             completion(.failure(.invalidURL))
             return
@@ -532,7 +532,7 @@ class SupabaseManager {
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "name": name,
             "brand": brand,
             "price": price,
@@ -540,6 +540,11 @@ class SupabaseManager {
             "description": description,
             "stock_quantity": stock
         ]
+        
+        // Agregar image_url solo si existe
+        if let imageUrl = imageUrl {
+            body["image_url"] = imageUrl
+        }
         
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         
@@ -556,4 +561,158 @@ class SupabaseManager {
             }
         }.resume()
     }
+    
+    func createOrder(body: [String: Any], completion: @escaping (Result<String, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/orders") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+                  let orderId = json.first?["id"] as? String else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            completion(.success(orderId))
+        }.resume()
+    }
+    
+    func createOrderItems(items: [[String: Any]], completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/order_items") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: items)
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                completion(.failure(.networkError("Failed to save order items")))
+            }
+        }.resume()
+    }
+    
+    func fetchOrders(completion: @escaping (Result<[OrderResponse], SupabaseError>) -> Void) {
+        guard let userId = currentUserId else {
+            completion(.failure(.authError("User not logged in")))
+            return
+        }
+        
+        let urlString = "\(supabaseURL)/rest/v1/orders?user_id=eq.\(userId)&select=*,order_items(*)&order=created_at.desc"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                
+                decoder.dateDecodingStrategy = .custom { decoder in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    formatter.formatOptions = [.withInternetDateTime]
+                    if let date = formatter.date(from: dateString) {
+                        return date
+                    }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date")
+                }
+                
+                let orders = try decoder.decode([OrderResponse].self, from: data)
+                completion(.success(orders))
+            } catch {
+                print("Fetch orders error: \(error)")
+                completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
 }
+
+struct OrderResponse: Codable, Identifiable {
+    let id: UUID
+    let userId: UUID
+    let status: String
+    let totalAmount: Double
+    let shippingAddress: String?
+    let createdAt: Date
+    let orderItems: [OrderItemResponse]
+    
+    enum CodingKeys: String, CodingKey {
+        case id, status
+        case userId = "user_id"
+        case totalAmount = "total_amount"
+        case shippingAddress = "shipping_address"
+        case createdAt = "created_at"
+        case orderItems = "order_items"
+    }
+}
+
+struct OrderItemResponse: Codable, Identifiable {
+    var id: UUID { UUID() } // Or decode if needed
+    let productId: UUID?
+    let quantity: Int
+    let priceAtPurchase: Double
+    
+    enum CodingKeys: String, CodingKey {
+        case productId = "product_id"
+        case quantity
+        case priceAtPurchase = "price_at_purchase"
+    }
+}
+

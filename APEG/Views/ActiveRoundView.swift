@@ -101,31 +101,18 @@ struct ActiveRoundView: View {
                     }
                 }
             }
-            .padding()
+            .padding(.horizontal, 25)
+            .padding(.vertical, 16)
             .background(Color.white)
             .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
             .zIndex(10)
             
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 30) {
                     
                     // Compact GPS Card
                     ZStack {
-                        // Background Gradient
-                        LinearGradient(
-                            colors: [Theme.primary, Color(hex: "2E8B57")],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        
-                        // Decorative Circles
-                        GeometryReader { proxy in
-                            Circle()
-                                .stroke(Color.white.opacity(0.1), lineWidth: 30)
-                                .frame(width: 200, height: 200)
-                                .offset(x: -50, y: -50)
-                        }
-                        
+// ... existing gradient/circles ...
                         HStack(spacing: 0) {
                             // Left Side: Info & Main Distance
                             VStack(alignment: .leading, spacing: 12) {
@@ -133,19 +120,19 @@ struct ActiveRoundView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack(alignment: .lastTextBaseline, spacing: 4) {
                                         Text("HOYO")
-                                            .font(.system(size: 14, weight: .medium))
+                                            .font(Theme.Typography.headline)
                                             .foregroundColor(.white.opacity(0.8))
                                         Text("\(currentHole)")
-                                            .font(.system(size: 28, weight: .black))
+                                            .font(Theme.Typography.title1)
                                             .foregroundColor(.white)
                                     }
                                     Text("Par 4 • Hcp 5")
-                                        .font(.system(size: 12, weight: .medium))
+                                        .font(Theme.Typography.caption)
                                         .foregroundColor(.white)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 2)
-                                        .background(Color.black.opacity(0.2))
-                                        .cornerRadius(6)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 4)
+                                        .background(Color.black.opacity(0.25))
+                                        .cornerRadius(8)
                                 }
                                 
                                 Spacer()
@@ -153,16 +140,16 @@ struct ActiveRoundView: View {
                                 // Main Distance
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text("AL CENTRO")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .tracking(1)
+                                        .font(Theme.Typography.headline)
+                                        .tracking(1.2)
                                         .foregroundColor(Color.white.opacity(0.7))
                                     
                                     HStack(alignment: .firstTextBaseline, spacing: 2) {
                                         Text(distances.center)
-                                            .font(.system(size: 56, weight: .heavy))
+                                            .font(.system(size: 64, weight: .black))
                                             .foregroundColor(.white)
                                         Text("yd")
-                                            .font(.system(size: 20, weight: .semibold))
+                                            .font(.system(size: 22, weight: .black))
                                             .foregroundColor(.white.opacity(0.8))
                                     }
                                 }
@@ -172,27 +159,27 @@ struct ActiveRoundView: View {
                             Spacer()
                             
                             // Right Side: Mini Map & Other Distances
-                            VStack(spacing: 16) {
+                            VStack(spacing: 20) {
                                 // Mini Map (Drawing / Standard Style)
                                 Map(position: $position) {
                                     Marker("", coordinate: currentHoleLocation)
                                         .tint(.green)
                                 }
                                 .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
-                                .frame(width: 90, height: 90)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .frame(width: 100, height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
+                                    RoundedRectangle(cornerRadius: 18)
                                         .stroke(Color.white.opacity(0.3), lineWidth: 1)
                                 )
-                                .shadow(color: .black.opacity(0.2), radius: 5)
+                                .shadow(color: .black.opacity(0.2), radius: 8)
                                 .onAppear { updateMapRegion() }
                                 .onChange(of: currentHole) {
                                     updateMapRegion()
                                 }
                                 
                                 // Back/Front
-                                VStack(spacing: 8) {
+                                VStack(spacing: 10) {
                                     GPSDistItem(label: "ATRÁS", value: distances.back)
                                     GPSDistItem(label: "FRENTE", value: distances.front)
                                 }
@@ -200,77 +187,77 @@ struct ActiveRoundView: View {
                             .padding(20)
                         }
                     }
-                    .frame(height: 240) // Reduced height from 380
+                    .frame(height: 260)
                     .mask(RoundedRectangle(cornerRadius: 32))
-                    .shadow(color: Theme.primary.opacity(0.4), radius: 15, x: 0, y: 8)
-                    .padding(.horizontal)
+                    .shadow(color: Theme.primary.opacity(0.3), radius: 20, x: 0, y: 10)
+                    .padding(.horizontal, 25)
                     
                     // Score Input Section
                     VStack(spacing: 16) {
                         Text("REGISTRAR SCORE")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(Theme.Typography.headline)
                             .tracking(1.5)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.secondary.opacity(0.7))
                         
                         ZStack {
-                            RoundedRectangle(cornerRadius: 24)
+                            RoundedRectangle(cornerRadius: 28)
                                 .fill(Color.white)
-                                .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
+                                .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
                             
                             HStack(spacing: 0) {
                                 Button(action: { updateScore(-1) }) {
                                     ZStack {
                                         Color.clear
                                         Image(systemName: "minus")
-                                            .font(.system(size: 20, weight: .bold))
+                                            .font(.system(size: 24, weight: .bold))
                                             .foregroundColor(Theme.primary)
                                     }
                                 }
-                                .frame(width: 70, height: 90)
+                                .frame(width: 80, height: 100)
                                 
-                                Divider().frame(height: 50)
+                                Divider().frame(height: 60)
                                 
-                                VStack(spacing: 4) {
+                                VStack(spacing: 6) {
                                     Text("\(scores[currentHole] ?? 4)")
-                                        .font(.system(size: 48, weight: .black))
+                                        .font(.system(size: 56, weight: .black))
                                         .foregroundColor(.primary)
                                     
                                     Text(scoreLabel)
-                                        .font(.system(size: 10, weight: .bold))
+                                        .font(.system(size: 11, weight: .black))
                                         .foregroundColor(.white)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 4)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 6)
                                         .background(Capsule().fill(scoreColor))
                                 }
                                 .frame(maxWidth: .infinity)
                                 
-                                Divider().frame(height: 50)
+                                Divider().frame(height: 60)
                                 
                                 Button(action: { updateScore(1) }) {
                                     ZStack {
                                         Color.clear
                                         Image(systemName: "plus")
-                                            .font(.system(size: 20, weight: .bold))
+                                            .font(.system(size: 24, weight: .bold))
                                             .foregroundColor(Theme.primary)
                                     }
                                 }
-                                .frame(width: 70, height: 90)
+                                .frame(width: 80, height: 100)
                             }
                         }
-                        .frame(height: 100) // Reduced height
-                        .padding(.horizontal)
+                        .frame(height: 110)
+                        .padding(.horizontal, 25)
                     }
                     
                     // Hole Selection
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 15) {
                         HStack {
                             Text("SIGUIENTE HOYO")
-                                .font(.system(size: 12, weight: .bold))
-                                .tracking(1)
-                                .foregroundColor(.secondary)
+                                .font(Theme.Typography.headline)
+                                .tracking(1.2)
+                                .foregroundColor(.secondary.opacity(0.7))
                             Spacer()
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 30)
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {

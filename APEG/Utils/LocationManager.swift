@@ -7,6 +7,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var location: CLLocation?
     @Published var isAuthorized = false
     @Published var heading: CLHeading?
+    @Published var cityName: String = "Detectando..."
+
+    private let geocoder = CLGeocoder()
 
     override init() {
         super.init()
@@ -25,6 +28,26 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
         DispatchQueue.main.async {
             self.location = location
+            self.reverseGeocode(location: location)
+        }
+    }
+    
+    private func reverseGeocode(location: CLLocation) {
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            guard let self = self, let placemark = placemarks?.first else { return }
+            
+            let city = placemark.locality ?? ""
+            let state = placemark.administrativeArea ?? ""
+            
+            DispatchQueue.main.async {
+                if !city.isEmpty && !state.isEmpty {
+                    self.cityName = "\(city), \(state)"
+                } else if !city.isEmpty {
+                    self.cityName = city
+                } else {
+                    self.cityName = "Ubicación Desconocida"
+                }
+            }
         }
     }
     

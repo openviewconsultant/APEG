@@ -3,47 +3,99 @@ import SwiftUI
 struct ProductCard: View {
     let title: String
     let price: Double
-    let imageName: String
+    let imageUrl: String?
     let brand: String?
     
+    var plusAction: (() -> Void)? = nil
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 24)
                     .fill(Color.white)
-                    .frame(height: 160)
-                    .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+                    .frame(height: 170)
+                    .shadow(color: .black.opacity(0.06), radius: 12, x: 0, y: 6)
                     .overlay(
-                        Image(systemName: "circle.hexagongrid.fill")
-                            .font(.system(size: 40))
-                            .foregroundColor(Theme.primary.opacity(0.3))
+                        GeometryReader { geo in
+                            Group {
+                                if let urlString = imageUrl, let url = URL(string: urlString) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                                .frame(width: geo.size.width, height: geo.size.height)
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: geo.size.width, height: geo.size.height)
+                                                .clipped()
+                                        case .failure:
+                                            placeholderImage
+                                                .frame(width: geo.size.width, height: geo.size.height)
+                                        @unknown default:
+                                            placeholderImage
+                                                .frame(width: geo.size.width, height: geo.size.height)
+                                        }
+                                    }
+                                } else {
+                                    placeholderImage
+                                        .frame(width: geo.size.width, height: geo.size.height)
+                                }
+                            }
+                        }
+                        .cornerRadius(24)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(Color.black.opacity(0.03), lineWidth: 1)
                     )
                 
-                Button(action: {}) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(Theme.primary)
-                        .padding(10)
+                if let action = plusAction {
+                    Button(action: {
+                        let generator = UIImpactFeedbackGenerator(style: .medium)
+                        generator.impactOccurred()
+                        action()
+                    }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Circle().fill(Color.black))
+                            .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 3)
+                    }
+                    .padding(12)
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
             
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 if let brand = brand {
                     Text(brand.uppercased())
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 10, weight: .black))
+                        .kerning(1.2)
                         .foregroundColor(Theme.primary)
                 }
                 
                 Text(title)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.primary)
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(Color(hex: "1A1A1A"))
                     .lineLimit(1)
                 
                 Text("$\(Int(price))")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.system(size: 17, weight: .black))
+                    .foregroundColor(Color(hex: "1A1A1A"))
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, 6)
+        }
+    }
+    
+    private var placeholderImage: some View {
+        ZStack {
+            Color(hex: "F0F0F0")
+            Image(systemName: "circle.hexagongrid.fill")
+                .font(.system(size: 30))
+                .foregroundColor(Theme.primary.opacity(0.2))
         }
     }
 }
@@ -354,68 +406,71 @@ struct PromoBannerCard: View {
             RoundedRectangle(cornerRadius: 35)
                 .fill(color)
                 .overlay(
-                    Circle()
-                        .fill(Color.white.opacity(0.05))
-                        .frame(width: 300, height: 300)
-                        .offset(x: 150, y: -100)
-                )
-                .overlay(
-                    Circle()
-                        .fill(Theme.primary.opacity(0.1))
-                        .frame(width: 200, height: 200)
-                        .offset(x: -100, y: 100)
+                    ZStack {
+                        Circle()
+                            .fill(Theme.primary.opacity(0.15))
+                            .frame(width: 250, height: 250)
+                            .offset(x: 150, y: -80)
+                            .blur(radius: 40)
+                        
+                        Circle()
+                            .fill(Color.white.opacity(0.03))
+                            .frame(width: 200, height: 200)
+                            .offset(x: -80, y: 120)
+                    }
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 35))
             
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 14) {
                     Text(tag.uppercased())
                         .font(.system(size: 11, weight: .black))
+                        .kerning(1.2)
                         .foregroundColor(Theme.primary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(8)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(10)
                     
-                    Text(title)
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white)
-                        .lineSpacing(2)
-                    
-                    HStack(spacing: 15) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.system(size: 28, weight: .black))
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                        
                         Text(price)
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                        
-                        Button(action: {}) {
-                            HStack {
-                                Text("Comprar")
-                                Image(systemName: "chevron.right")
-                            }
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(.black)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.white)
-                            .cornerRadius(12)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    
+                    Button(action: {}) {
+                        HStack(spacing: 8) {
+                            Text("Comprar Ahora")
+                            Image(systemName: "chevron.right")
                         }
+                        .font(.system(size: 13, weight: .black))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(Color.white)
+                        .cornerRadius(15)
                     }
                     .padding(.top, 5)
                 }
-                .padding(28)
+                .padding(30)
                 
                 Spacer()
                 
                 ZStack {
                     Image(systemName: imageName)
-                        .font(.system(size: 100))
-                        .foregroundColor(.white.opacity(0.15))
-                        .rotationEffect(.degrees(-15))
+                        .font(.system(size: 110))
+                        .foregroundColor(.white.opacity(0.12))
+                        .rotationEffect(.degrees(-10))
+                        .offset(x: 20, y: 10)
                 }
-                .padding(.trailing, 20)
             }
         }
-        .shadow(color: color.opacity(0.3), radius: 20, x: 0, y: 12)
+        .shadow(color: color.opacity(0.3), radius: 25, x: 0, y: 15)
     }
 }
 
@@ -430,35 +485,35 @@ struct QuickActionCard: View {
     
     var body: some View {
         Button(action: { 
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                action()
-            }
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+            action()
         }) {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(spacing: 16) {
                 ZStack {
-                    Circle()
-                        .fill(color.opacity(0.12))
-                        .frame(width: 44, height: 44)
-                    Image(systemName: icon)
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(color)
+                    RoundedRectangle(cornerRadius: 32)
+                        .fill(Color.white)
+                        .frame(width: 95, height: 95)
+                        .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
+                    
+                    ZStack {
+                        Circle()
+                            .fill(color.opacity(0.12))
+                            .frame(width: 50, height: 50)
+                        Image(systemName: icon)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(color)
+                    }
                 }
                 
                 Text(title)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(Color(hex: "1A1A1A"))
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 30)
-                    .fill(Color.white)
-                    .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
-            )
         }
-        .scaleEffect(isPressed ? 0.95 : 1)
+        .scaleEffect(isPressed ? 0.94 : 1)
         .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 isPressed = pressing
             }
         }, perform: {})
@@ -470,28 +525,30 @@ struct PlayActionCard: View {
     @State private var isPressed = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 25) {
             HStack {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 8) {
                         Circle()
                             .fill(Theme.primary)
-                            .frame(width: 8, height: 8)
+                            .frame(width: 10, height: 10)
+                            .shadow(color: Theme.primary.opacity(0.5), radius: 4, x: 0, y: 0)
                         Text("ESTADO DEL CAMPO")
-                            .font(.system(size: 11, weight: .black))
+                            .font(.system(size: 12, weight: .black))
+                            .kerning(1.2)
                             .foregroundColor(Theme.primary)
                     }
                     Text("Listo para Jugar")
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 32, weight: .black))
                 }
                 Spacer()
                 ZStack {
                     Circle()
-                        .fill(Theme.primary.opacity(0.1))
-                        .frame(width: 54, height: 54)
+                        .fill(Theme.primary.opacity(0.12))
+                        .frame(width: 60, height: 60)
                     Image(systemName: "circle.hexagongrid.fill")
                         .foregroundColor(Theme.primary)
-                        .font(.title2)
+                        .font(.title)
                 }
             }
             
@@ -502,35 +559,40 @@ struct PlayActionCard: View {
             }
             
             Button(action: {
-                withAnimation(.spring()) {
-                    action()
-                }
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+                action()
             }) {
-                HStack {
+                HStack(spacing: 12) {
                     Text("EMPEZAR RONDA")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 17, weight: .black))
+                        .kerning(1.0)
                     Image(systemName: "play.fill")
                         .font(.system(size: 14))
                 }
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
+                .padding(.vertical, 20)
                 .background(
-                    LinearGradient(colors: [Theme.primary, Theme.primary.opacity(0.85)], startPoint: .top, endPoint: .bottom)
+                    LinearGradient(
+                        colors: [Color(hex: "68C36B"), Color(hex: "4CAF50")],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
                 )
-                .cornerRadius(20)
-                .shadow(color: Theme.primary.opacity(0.4), radius: 12, x: 0, y: 8)
+                .cornerRadius(22)
+                .shadow(color: Color(hex: "4CAF50").opacity(0.4), radius: 15, x: 0, y: 10)
             }
         }
-        .padding(28)
+        .padding(30)
         .background(
-            RoundedRectangle(cornerRadius: 35)
+            RoundedRectangle(cornerRadius: 40)
                 .fill(Color.white)
-                .shadow(color: .black.opacity(0.06), radius: 25, x: 0, y: 15)
+                .shadow(color: .black.opacity(0.06), radius: 30, x: 0, y: 15)
         )
         .scaleEffect(isPressed ? 0.97 : 1)
         .onLongPressGesture(minimumDuration: .infinity, pressing: { pressing in
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(.easeInOut(duration: 0.15)) {
                 isPressed = pressing
             }
         }, perform: {})
