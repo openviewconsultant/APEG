@@ -6,7 +6,7 @@ struct CartView: View {
     @State private var showCheckout = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if cartManager.items.isEmpty {
                     VStack(spacing: 20) {
@@ -36,7 +36,6 @@ struct CartView: View {
                         }
                         .padding()
                     }
-                    
                     VStack(spacing: 20) {
                         Divider()
                         HStack {
@@ -49,16 +48,21 @@ struct CartView: View {
                         }
                         .padding(.horizontal)
                         
-                        NavigationLink(destination: CheckoutView(), isActive: $showCheckout) {
-                            Button(action: { showCheckout = true }) {
-                                Text("Finalizar Compra")
-                                    .font(Theme.Typography.button)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Theme.primary)
-                                    .cornerRadius(15)
-                            }
+                        Button(action: { 
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.impactOccurred()
+                            showCheckout = true 
+                        }) {
+                            Text("Finalizar Compra")
+                                .font(Theme.Typography.button)
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Theme.primary)
+                                .cornerRadius(15)
+                        }
+                        .navigationDestination(isPresented: $showCheckout) {
+                            CheckoutView()
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 30)

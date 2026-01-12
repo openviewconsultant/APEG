@@ -1,6 +1,7 @@
 import Foundation
 import WeatherKit
 import CoreLocation
+import Combine
 
 @MainActor
 class WeatherManager: ObservableObject {

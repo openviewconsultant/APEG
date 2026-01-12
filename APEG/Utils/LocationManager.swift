@@ -1,6 +1,5 @@
-import CoreLocation
-import SwiftUI
 import Combine
+import MapKit
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
@@ -33,20 +32,37 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     private func reverseGeocode(location: CLLocation) {
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
-            guard let self = self, let placemark = placemarks?.first else { return }
-            
-            let city = placemark.locality ?? ""
-            let state = placemark.administrativeArea ?? ""
-            
-            DispatchQueue.main.async {
-                if !city.isEmpty && !state.isEmpty {
-                    self.cityName = "\(city), \(state)"
-                } else if !city.isEmpty {
-                    self.cityName = city
-                } else {
-                    self.cityName = "Ubicación Desconocida"
+        if #available(iOS 18.0, *) {
+            let request = MKReverseGeocodingRequest(coordinate: location.coordinate)
+            Task {
+                do {
+                    let response = try await request.response
+                    if let placemark = response.placemarks.first {
+                        self.processPlacemark(placemark)
+                    }
+                } catch {
+                    print("MapKit Geocoding Error: \(error.localizedDescription)")
                 }
+            }
+        } else {
+            geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+                guard let self = self, let placemark = placemarks?.first else { return }
+                self.processPlacemark(placemark)
+            }
+        }
+    }
+    
+    private func processPlacemark(_ placemark: CLPlacemark) {
+        let city = placemark.locality ?? ""
+        let state = placemark.administrativeArea ?? ""
+        
+        DispatchQueue.main.async {
+            if !city.isEmpty && !state.isEmpty {
+                self.cityName = "\(city), \(state)"
+            } else if !city.isEmpty {
+                self.cityName = city
+            } else {
+                self.cityName = "Ubicación Desconocida"
             }
         }
     }

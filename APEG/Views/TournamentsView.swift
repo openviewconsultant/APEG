@@ -3,6 +3,8 @@ import SwiftUI
 struct TournamentsView: View {
     @State private var selectedFilter = "Todos"
     let filters = ["Todos", "Pro", "Amateur", "Caridad"]
+    @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var weatherManager: WeatherManager
     
     var body: some View {
         ScrollView {
@@ -106,16 +108,16 @@ struct TournamentsView: View {
                                     Circle()
                                         .fill(Color.blue.opacity(0.1))
                                         .frame(width: 44, height: 44)
-                                    Image(systemName: "sun.max.fill")
+                                    Image(systemName: weatherManager.symbol)
                                         .foregroundColor(.blue)
                                 }
                                 Spacer()
                             }
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Soleado")
+                                Text(weatherManager.condition)
                                     .font(Theme.Typography.title2)
-                                Text("22°C • Vientos 8km/h")
+                                Text("\(weatherManager.temperature) • Vientos 8km/h")
                                     .font(Theme.Typography.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -171,12 +173,12 @@ struct TournamentsView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Soleado")
+                            Text(weatherManager.condition)
                                 .font(.system(size: 24, weight: .bold))
-                            Text("22°C • Viento 8km/h")
+                            Text("\(weatherManager.temperature) • Viento 8km/h")
                                 .font(Theme.Typography.caption)
                                 .foregroundColor(.secondary)
-                            Text("Condiciones perfectas")
+                            Text("Condiciones actuales")
                                 .font(Theme.Typography.caption)
                                 .foregroundColor(.blue)
                                 .padding(.top, 4)

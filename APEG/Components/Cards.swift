@@ -521,6 +521,10 @@ struct QuickActionCard: View {
 }
 
 struct PlayActionCard: View {
+    let temperature: String
+    let condition: String
+    let symbol: String
+    let locationName: String
     var action: () -> Void
     @State private var isPressed = false
     
@@ -553,8 +557,8 @@ struct PlayActionCard: View {
             }
             
             HStack(spacing: 12) {
-                PlaySubItem(icon: "sun.max.fill", label: "22°C", subLabel: "Soleado")
-                PlaySubItem(icon: "mappin.and.ellipse", label: "Pebble Beach", subLabel: "Cambiar")
+                PlaySubItem(icon: symbol, label: temperature, subLabel: condition)
+                PlaySubItem(icon: "mappin.and.ellipse", label: locationName, subLabel: "Cambiar")
                 PlaySubItem(icon: "list.bullet.clipboard", label: "Scorecard", subLabel: "Registrar")
             }
             

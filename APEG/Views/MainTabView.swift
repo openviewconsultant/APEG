@@ -4,6 +4,8 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab = 0
+    @StateObject private var locationManager = LocationManager()
+    @StateObject private var weatherManager = WeatherManager()
     
     init() {
         // Force the native TabBar to be invisible
@@ -43,7 +45,23 @@ struct MainTabView: View {
             
             customTabBar
         }
+        .environmentObject(locationManager)
+        .environmentObject(weatherManager)
         .ignoresSafeArea(.all, edges: .bottom)
+        .onAppear {
+            if let location = locationManager.location {
+                Task {
+                    await weatherManager.fetchWeather(for: location)
+                }
+            }
+        }
+        .onChange(of: locationManager.location) { oldLocation, newLocation in
+            if let location = newLocation {
+                Task {
+                    await weatherManager.fetchWeather(for: location)
+                }
+            }
+        }
     }
     
     private var customTabBar: some View {

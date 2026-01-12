@@ -3,6 +3,8 @@ import SwiftUI
 struct HomeView: View {
     @State private var showPlayView = false
     @State private var profile: UserProfile?
+    @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var weatherManager: WeatherManager
     
     var body: some View {
         ScrollView {
@@ -10,7 +12,12 @@ struct HomeView: View {
                 headerSection
                 
                 // Main Play Card
-                PlayActionCard() {
+                PlayActionCard(
+                    temperature: weatherManager.temperature,
+                    condition: weatherManager.condition,
+                    symbol: weatherManager.symbol,
+                    locationName: locationManager.cityName
+                ) {
                     showPlayView = true
                 }
                 .padding(.horizontal, 20)
@@ -100,14 +107,14 @@ struct HomeView: View {
             HStack(spacing: 18) {
                 VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 6) {
-                        Image(systemName: "sun.max.fill")
+                        Image(systemName: weatherManager.symbol)
                             .font(.system(size: 18))
                             .foregroundColor(.orange)
-                        Text("22°C")
-                            .font(Theme.Typography.title2) // Using title2 for temperature to match design weight
+                        Text(weatherManager.temperature)
+                            .font(Theme.Typography.title2)
                             .foregroundColor(Color(hex: "1A1A1A"))
                     }
-                    Text("Pebble Beach, CA")
+                    Text(locationManager.cityName)
                         .font(Theme.Typography.caption)
                         .foregroundColor(.secondary)
                 }
