@@ -5,13 +5,7 @@ struct PlayView: View {
     @State private var searchText = ""
     @State private var selectedCourse: GolfCourse?
     
-    static let courses = [
-        GolfCourse(name: "Country Club de Bogotá", location: "Bogotá, Colombia", distance: "0.5 km", rating: "5.0", imageName: "c1", latitude: 4.707, longitude: -74.04),
-        GolfCourse(name: "Club Los Lagartos", location: "Bogotá, Colombia", distance: "3.2 km", rating: "4.8", imageName: "c2", latitude: 4.72, longitude: -74.08),
-        GolfCourse(name: "Club El Rincón de Cajicá", location: "Cajicá, Colombia", distance: "15.4 km", rating: "4.9", imageName: "c3", latitude: 4.93, longitude: -74.03),
-        GolfCourse(name: "Club Campestre de Medellín", location: "Rionegro, Colombia", distance: "25.1 km", rating: "4.7", imageName: "c4", latitude: 6.15, longitude: -75.42),
-        GolfCourse(name: "Karibana Golf Club", location: "Cartagena, Colombia", distance: "450 km", rating: "4.9", imageName: "c5", latitude: 10.57, longitude: -75.50)
-    ]
+    static let courses = GolfCourse.sampleCourses
     
     var filteredCourses: [GolfCourse] {
         if searchText.isEmpty {
@@ -31,55 +25,12 @@ struct PlayView: View {
                             selectedCourse = course
                         }
                     }) {
-                        HStack(spacing: 16) {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.05))
-                                .frame(width: 70, height: 70)
-                                .overlay(Image(systemName: "flag.fill").foregroundColor(Theme.primary.opacity(0.5)))
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(course.name)
-                                    .font(.system(size: 16))
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                Text(course.location)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.white.opacity(0.6))
-                                    .lineLimit(1)
-                                HStack {
-                                    Label(course.distance, systemImage: "location.fill")
-                                    Spacer()
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "star.fill")
-                                            .foregroundColor(.orange)
-                                        Text(course.rating)
-                                            .foregroundColor(Theme.primary)
-                                            .fontWeight(.bold)
-                                    }
-                                }
-                                .font(.system(size: 12))
-                                .fontWeight(.medium)
-                                .foregroundColor(.white.opacity(0.5))
-                            }
-                        }
-                        .padding(.vertical, 8) // Add internal vertical padding
-                        .padding(.horizontal, 4) // Add internal horizontal padding to pull away from edges
+                    GolfCourseCard(course: course)
                     }
                     .foregroundColor(.primary)
                     .listRowSeparator(.hidden)
-                    .listRowBackground(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Theme.cardBackground)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 16)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
-                                    .padding(.vertical, 6)
-                                    .padding(.horizontal, 16)
-                            )
-                    )
+                    .listRowBackground(Color.clear)
+                    .padding(.vertical, 4)
                 }
                 .listStyle(.plain)
             }

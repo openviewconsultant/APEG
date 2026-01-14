@@ -22,12 +22,16 @@ struct AuthView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 40) {
                     // Branding
-                    VStack(spacing: 20) {
+                    VStack(spacing: 12) {
                         Text(isRegistering ? "ÚNETE AL CLUB" : "BIENVENIDO AL CLUB")
-                            .font(.title2)
-                            .fontWeight(.black)
+                            .font(.system(size: 28, weight: .black, design: .rounded))
                             .foregroundColor(.white)
-                            .tracking(2)
+                            .tracking(4)
+                        
+                        Text("La excelencia está en cada detalle.")
+                            .font(Theme.Typography.caption)
+                            .foregroundColor(.white.opacity(0.4))
+                            .tracking(1)
                     }
                     .padding(.top, 80)
                     
@@ -90,18 +94,18 @@ struct AuthView: View {
                             ZStack {
                                 if isLoading {
                                     ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 } else {
                                     Text(isRegistering ? "Crear Cuenta" : "Iniciar Sesión")
-                                        .font(.headline)
+                                        .font(Theme.Typography.button)
                                         .foregroundColor(.white)
                                 }
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
                             .background(Theme.primary)
-                            .cornerRadius(16)
-                            .shadow(color: Theme.primary.opacity(0.3), radius: 10, x: 0, y: 5)
+                            .cornerRadius(32)
+                            .shadow(color: Theme.primary.opacity(0.4), radius: 20, x: 0, y: 10)
                         }
                         .disabled(isLoading)
                         
@@ -124,7 +128,7 @@ struct AuthView: View {
                         }
                         .signInWithAppleButtonStyle(.white)
                         .frame(height: 55)
-                        .cornerRadius(16)
+                        .cornerRadius(32)
                         
                         Button(action: {
                             withAnimation(.spring()) {
@@ -144,10 +148,8 @@ struct AuthView: View {
                     .padding(30)
                     .padding(.horizontal, 20)
                     
-                    Text("La excelencia está en cada detalle.")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.5))
-                        .padding(.bottom, 40)
+                    // Bottom Spacer
+                    Spacer().frame(height: 40)
                 }
             }
         }

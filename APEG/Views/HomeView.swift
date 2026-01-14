@@ -28,7 +28,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("EXPLORAR")
                         .font(Theme.Typography.caption)
-                        .kerning(1.5)
+                        .kerning(4)
                         .foregroundColor(.white.opacity(0.4))
                         .padding(.horizontal, 25)
                     
@@ -85,14 +85,16 @@ struct HomeView: View {
     
     private var headerSection: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("HOLA,")
                     .font(Theme.Typography.caption)
-                    .kerning(1.5)
+                    .kerning(4)
                     .foregroundColor(.white.opacity(0.4))
-                Text(profile?.fullName?.components(separatedBy: " ").first ?? "Edgar")
-                    .font(Theme.Typography.title2)
+                
+                Text(profile?.fullName?.components(separatedBy: " ").first ?? "EDGAR")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
                     .foregroundColor(.white)
+                    .tracking(1)
             }
             
             Spacer()

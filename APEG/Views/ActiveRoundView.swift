@@ -117,7 +117,19 @@ struct ActiveRoundView: View {
                     
                     // Compact GPS Card
                     ZStack {
-// ... existing gradient/circles ...
+                        // Background Image
+                        Image(course.imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 260)
+                            .clipped()
+                            .overlay(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [.black.opacity(0.9), .black.opacity(0.4), .black.opacity(0.2)]),
+                                    startPoint: .bottom,
+                                    endPoint: .top
+                                )
+                            )
                         HStack(spacing: 0) {
                             // Left Side: Info & Main Distance
                             VStack(alignment: .leading, spacing: 12) {
@@ -175,7 +187,7 @@ struct ActiveRoundView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 18))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 18)
-                                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                        .stroke(Theme.softGreenBorder.opacity(0.6), lineWidth: 1)
                                 )
                                 .shadow(color: .black.opacity(0.2), radius: 8)
                                 .onAppear { updateMapRegion() }
@@ -194,7 +206,11 @@ struct ActiveRoundView: View {
                     }
                     .frame(height: 260)
                     .mask(RoundedRectangle(cornerRadius: 32))
-                    .shadow(color: Theme.primary.opacity(0.3), radius: 20, x: 0, y: 10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 32)
+                            .stroke(Theme.softGreenBorder.opacity(0.6), lineWidth: 1)
+                    )
+                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
                     .padding(.horizontal, 25)
                     
                     // Score Input Section
@@ -207,7 +223,11 @@ struct ActiveRoundView: View {
                         ZStack {
                             RoundedRectangle(cornerRadius: 28)
                                 .fill(Theme.pureWhite)
-                                .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 28)
+                                        .stroke(Theme.softGreenBorder.opacity(0.6), lineWidth: 1)
+                                )
+                                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
                             
                             HStack(spacing: 0) {
                                 Button(action: { updateScore(-1) }) {
@@ -293,7 +313,7 @@ struct ActiveRoundView: View {
                                                 )
                                                 .overlay(
                                                     RoundedRectangle(cornerRadius: 14)
-                                                        .stroke(currentHole == hole ? Color.clear : Color.white.opacity(0.05), lineWidth: 1)
+                                                        .stroke(currentHole == hole ? Color.clear : Theme.softGreenBorder.opacity(0.6), lineWidth: 1)
                                                 )
                                         )
                                         .foregroundColor(currentHole == hole ? .white : .white)
@@ -412,5 +432,5 @@ struct GPSDistItem: View {
 }
 
 #Preview {
-    ActiveRoundView(course: GolfCourse(name: "Country Club de Bogotá", location: "Bogotá", distance: "0km", rating: "5.0", imageName: "", latitude: 4.707, longitude: -74.04))
+    ActiveRoundView(course: GolfCourse(name: "Country Club de Bogotá", location: "Bogotá", distance: "0km", rating: "5.0", imageName: "", latitude: 4.707, longitude: -74.04, description: nil, subCourses: nil))
 }

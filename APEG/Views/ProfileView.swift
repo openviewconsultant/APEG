@@ -33,27 +33,40 @@ struct ProfileView: View {
                         }
                         .padding(.top, 40)
                     } else {
-                        VStack(spacing: 20) {
+                        VStack(spacing: 24) {
                             ZStack {
                                 Circle()
                                     .fill(LinearGradient(colors: [Theme.primary, Theme.secondary], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .frame(width: 110, height: 110)
+                                    .frame(width: 120, height: 120)
                                 
                                 Text(getInitials(name: profile?.fullName))
-                                    .font(.system(size: 38, weight: .black, design: .rounded))
+                                    .font(.system(size: 44, weight: .black, design: .rounded))
                                     .foregroundColor(.white)
                             }
-                            .shadow(color: Theme.primary.opacity(0.3), radius: 20, x: 0, y: 10)
+                            .shadow(color: Theme.primary.opacity(0.4), radius: 30, x: 0, y: 15)
                             
-                            VStack(spacing: 4) {
-                                Text(profile?.fullName ?? "Usuario")
-                                    .font(Theme.Typography.title2)
+                            VStack(spacing: 6) {
+                                Text(profile?.fullName ?? "Cargando...")
+                                    .font(Theme.Typography.title1)
                                     .foregroundColor(.white)
+                                    .tracking(1)
                                 
-                                Text(profile?.isPremium == true ? "Socio de Oro" : "Socio")
-                                    .font(Theme.Typography.subheadline)
+                                Text(profile?.isPremium == true ? "SOCIO GOLD" : "SOCIO ESTÁNDAR")
+                                    .font(Theme.Typography.caption)
                                     .foregroundColor(Theme.primary)
-                                    .fontWeight(.bold)
+                                    .fontWeight(.black)
+                                    .tracking(2)
+                                
+                                // Botón de Test (DEBUG)
+                                Button(action: togglePremiumStatus) {
+                                    Text("CAMBIAR A \(profile?.isPremium == true ? "NORMAL" : "GOLD")")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.white.opacity(0.1))
+                                        .cornerRadius(20)
+                                        .padding(.top, 4)
+                                }
                             }
                         }
                         .padding(.top, 40)
@@ -80,6 +93,16 @@ struct ProfileView: View {
                             
                             NavigationLink(destination: MyOrdersView()) {
                                 ProfileMenuRowContent(icon: "bag", title: "Mis Pedidos", color: Theme.primary)
+                            }
+                            
+                            NavigationLink(destination: ChatListView()) {
+                                ProfileMenuRowContent(icon: "message.fill", title: "Mis Mensajes", color: .blue)
+                            }
+                            
+                            if profile?.isPremium == true {
+                                NavigationLink(destination: ProductEditView()) {
+                                    ProfileMenuRowContent(icon: "tag.fill", title: "Vender Artículo", color: .green)
+                                }
                             }
                         }
                         
@@ -128,6 +151,19 @@ struct ProfileView: View {
         }
     }
     
+    private func togglePremiumStatus() {
+        guard let currentProfile = profile else { return }
+        self.profile = UserProfile(
+            id: currentProfile.id,
+            fullName: currentProfile.fullName,
+            federationCode: currentProfile.federationCode,
+            idPhotoUrl: currentProfile.idPhotoUrl,
+            updatedAt: currentProfile.updatedAt,
+            email: currentProfile.email,
+            isPremium: !(currentProfile.isPremium ?? false)
+        )
+    }
+    
     private func loadProfile() {
         SupabaseManager.shared.fetchProfile { result in
             DispatchQueue.main.async {
@@ -137,6 +173,8 @@ struct ProfileView: View {
                     self.profile = data
                 case .failure(let error):
                     print("Error loading profile: \(error)")
+                    // Fallback mock for testing UI if needed
+                    self.profile = UserProfile(id: UUID(), fullName: "Edgar Barragán G.", federationCode: "12345", idPhotoUrl: nil, updatedAt: nil, email: "edgar@example.com", isPremium: true)
                 }
             }
         }
@@ -159,18 +197,18 @@ struct ProfileStatItem: View {
     var body: some View {
         VStack(spacing: 6) {
             Text(value)
-                .font(Theme.Typography.title3)
+                .font(Theme.Typography.title2)
                 .foregroundColor(.white)
             Text(title)
                 .font(Theme.Typography.caption)
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(Theme.lightGray)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
+        .padding(.vertical, 24)
         .background(Theme.cardBackground)
-        .cornerRadius(24)
+        .cornerRadius(32)
         .overlay(
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 32)
                 .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
     }

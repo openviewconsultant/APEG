@@ -41,8 +41,8 @@ struct GreenFeesView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 25)
                         
-                        ForEach(0..<3) { _ in
-                            CourseCard()
+                        ForEach(GolfCourse.sampleCourses.prefix(3)) { course in
+                            CourseCard(course: course)
                                 .padding(.horizontal, 22)
                         }
                     }
@@ -76,47 +76,10 @@ struct FilterChip: View {
 }
 
 struct CourseCard: View {
+    let course: GolfCourse
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 180)
-                
-                HStack {
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.orange)
-                    Text("4.8")
-                        .foregroundColor(.white)
-                        .fontWeight(.bold)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Theme.cardBackground)
-                .cornerRadius(12)
-                .padding(12)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Pebble Beach Golf Links")
-                    .font(Theme.Typography.body)
-                    .foregroundColor(.white)
-                
-                HStack {
-                    Image(systemName: "mappin.and.ellipse")
-                    Text("San Francisco, CA")
-                    Spacer()
-                    Text("desde $250")
-                        .font(Theme.Typography.body)
-                        .foregroundColor(Theme.primary)
-                }
-                .font(Theme.Typography.caption)
-                .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, 8)
-        }
-        .padding(12)
-        .background(ModernCardBackground())
+        GolfCourseCard(course: course)
     }
 }
 

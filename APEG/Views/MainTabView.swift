@@ -43,23 +43,23 @@ struct MainTabView: View {
             tabItem(index: 3, icon: "bag.fill")
             tabItem(index: 4, icon: "person.fill")
         }
-        .padding(.horizontal, 15)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 8)
         .background {
             Capsule()
-                .fill(Color(hex: "121212").opacity(0.85))
+                .fill(Color.black.opacity(0.4))
                 .overlay(
                     Capsule()
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.05), lineWidth: 0.5)
                 )
         }
-        .background(BlurView(style: .systemThinMaterialDark).clipShape(Capsule()))
-        .shadow(color: .black.opacity(0.4), radius: 20, x: 0, y: 10)
-        .padding(.horizontal, 20)
-        .padding(.bottom, 25)
+        .background(BlurView(style: .systemUltraThinMaterialDark).clipShape(Capsule()))
+        .shadow(color: .black.opacity(0.5), radius: 30, x: 0, y: 15)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 20)
         .overlay {
             centralButton
-                .offset(y: -32)
+                .offset(y: -20)
         }
     }
     
@@ -76,8 +76,8 @@ struct MainTabView: View {
                     .fill(
                         LinearGradient(colors: [Theme.primary, Theme.secondary], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
-                    .frame(width: 68, height: 68)
-                    .shadow(color: Theme.primary.opacity(0.5), radius: 15, x: 0, y: 8)
+                    .frame(width: 64, height: 64)
+                    .shadow(color: Theme.primary.opacity(0.4), radius: 20, x: 0, y: 10)
                 
                 Image("apeg_logo")
                     .resizable()

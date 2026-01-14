@@ -4,11 +4,13 @@ struct Theme {
     static let primary = Color(hex: "8A4FFF") // Modern Vibrant Purple
     static let secondary = Color(hex: "00C2FF") // Electric Blue
     static let accent = Color(hex: "FF3D71") // Vibrant Rose
+    static let softGreenBorder = Color(hex: "236934") // User requested soft green
     
     static let background = Color.black
-    static let cardBackground = Color(hex: "1A1A1A")
+    static let cardBackground = Color(hex: "1A1A1A").opacity(0.8)
     static let deepBlack = Color.black
     static let pureWhite = Color.white
+    static let lightGray = Color.white.opacity(0.6)
     
     struct Shadows {
         struct soft {
@@ -22,7 +24,7 @@ struct Theme {
     struct Typography {
         static let largeTitle = Font.system(size: 34, weight: .black, design: .rounded)
         static let title1 = Font.system(size: 28, weight: .bold, design: .rounded)
-        static let title2 = Font.system(size: 22, weight: .bold, design: .rounded)
+        static let title2 = Font.system(size: 24, weight: .bold, design: .rounded)
         static let title3 = Font.system(size: 20, weight: .semibold, design: .rounded)
         static let headline = Font.system(size: 17, weight: .bold, design: .rounded)
         static let body = Font.system(size: 17, weight: .regular, design: .rounded)

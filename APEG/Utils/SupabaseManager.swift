@@ -209,13 +209,12 @@ class SupabaseManager {
         UserDefaults.standard.set(false, forKey: "isLoggedIn")
     }
     
-    private func uploadIDPhoto(userId: String, image: UIImage, completion: @escaping (Result<String, SupabaseError>) -> Void) {
+    func uploadIDPhoto(userId: String, image: UIImage, completion: @escaping (Result<String, SupabaseError>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             completion(.failure(.networkError("Could not process image")))
             return
         }
         
-        // Use a generic name or keep using cedula.jpg. Ideally should be unique per upload if history matters.
         let fileName = "\(userId)/cedula_\(Int(Date().timeIntervalSince1970)).jpg"
         
         guard let url = URL(string: "\(supabaseURL)/storage/v1/object/id-documents/\(fileName)") else {
@@ -223,24 +222,66 @@ class SupabaseManager {
             return
         }
         
+        uploadFile(url: url, data: imageData, completion: { result in 
+            switch result {
+            case .success: completion(.success(fileName))
+            case .failure(let error): completion(.failure(error))
+            }
+        })
+    }
+
+    func uploadProductImage(image: UIImage, completion: @escaping (Result<String, SupabaseError>) -> Void) {
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
+            completion(.failure(.networkError("Could not process image")))
+            return
+        }
+        
+        let fileName = "prod_\(UUID().uuidString).jpg"
+        // Assuming a 'products' bucket exists as per implied requirement, or reusing a public bucket
+        // If 'products' bucket doesn't exist, user needs to create it. 
+        // I'll stick to 'public' or assume 'products' exists given the migration context, 
+        // but storage buckets aren't in SQL migration usually. 
+        // Usage of 'products' bucket is standard.
+        guard let url = URL(string: "\(supabaseURL)/storage/v1/object/products/\(fileName)") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        uploadFile(url: url, data: imageData) { result in
+             switch result {
+            case .success: 
+                // Return full public URL for products usually
+                // Or just filename if we construct it later. Let's return full URL if possible or just filename.
+                // Supabase public URL format: projectUrl/storage/v1/object/public/bucket/file
+                // But for now just returning filename/path
+                completion(.success(fileName))
+            case .failure(let error): completion(.failure(error))
+            }
+        }
+    }
+
+    private func uploadFile(url: URL, data: Data, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
-        // Use the token if we have it, otherwise fallback to anon (though RLS might block anon)
         if let token = accessToken {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         } else {
-            request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+             request.addValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         }
         request.addValue("image/jpeg", forHTTPHeaderField: "Content-Type")
-        request.httpBody = imageData
+        request.httpBody = data
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { _, response, error in
             if let error = error {
                 completion(.failure(.networkError(error.localizedDescription)))
                 return
             }
-            completion(.success(fileName))
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                completion(.failure(.networkError("Upload failed")))
+            }
         }.resume()
     }
     
@@ -590,6 +631,11 @@ class SupabaseManager {
     }
     
     func saveProduct(name: String, brand: String, price: Double, category: String, description: String, stock: Int, imageUrl: String? = nil, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+        // Legacy support wrapper calling extended
+        saveProductExtended(name: name, brand: brand, price: price, category: category, description: description, stock: stock, images: imageUrl != nil ? [imageUrl!] : nil, sellerId: currentUserId ?? "", completion: completion)
+    }
+
+    func saveProductExtended(name: String, brand: String, price: Double, category: String, description: String, stock: Int, images: [String]? = nil, sellerId: String, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
         guard let url = URL(string: "\(supabaseURL)/rest/v1/products") else {
             completion(.failure(.invalidURL))
             return
@@ -611,12 +657,13 @@ class SupabaseManager {
             "price": price,
             "category": category,
             "description": description,
-            "stock_quantity": stock
+            "stock_quantity": stock,
+            "seller_id": sellerId
         ]
         
-        // Agregar image_url solo si existe
-        if let imageUrl = imageUrl {
-            body["image_url"] = imageUrl
+        if let images = images, !images.isEmpty {
+            body["images"] = images
+            body["image_url"] = images.first // Backwards compatibility
         }
         
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
@@ -755,6 +802,214 @@ class SupabaseManager {
             }
         }.resume()
     }
+
+
+    // MARK: - Marketplace (Chats & Reviews)
+    
+    func fetchChats(userId: String, completion: @escaping (Result<[Chat], SupabaseError>) -> Void) {
+        // Fetch chats where user is buyer OR seller
+        let query = "or=(buyer_id.eq.\(userId),seller_id.eq.\(userId))"
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/chats?\(query)&select=*,product:products(*)") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                decoder.dateDecodingStrategy = .custom { decoder in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    if let date = formatter.date(from: dateString) { return date }
+                    formatter.formatOptions = [.withInternetDateTime]
+                    if let date = formatter.date(from: dateString) { return date }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date")
+                }
+                let chats = try decoder.decode([Chat].self, from: data)
+                completion(.success(chats))
+            } catch {
+                print("Fetch chats error: \(error)")
+                completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
+    
+    func createChat(productId: UUID, sellerId: UUID, buyerId: UUID, completion: @escaping (Result<UUID, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/chats") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("return=representation", forHTTPHeaderField: "Prefer")
+        
+        let body: [String: Any] = [
+            "product_id": productId.uuidString,
+            "seller_id": sellerId.uuidString,
+            "buyer_id": buyerId.uuidString
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+                  let idString = json.first?["id"] as? String,
+                  let id = UUID(uuidString: idString) else {
+                completion(.failure(.decodingError))
+                return
+            }
+            completion(.success(id))
+        }.resume()
+    }
+    
+    func fetchMessages(chatId: UUID, completion: @escaping (Result<[Message], SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/messages?chat_id=eq.\(chatId.uuidString)&select=*&order=created_at.asc") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                decoder.dateDecodingStrategy = .custom { decoder in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    if let date = formatter.date(from: dateString) { return date }
+                    formatter.formatOptions = [.withInternetDateTime]
+                    if let date = formatter.date(from: dateString) { return date }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date")
+                }
+                let messages = try decoder.decode([Message].self, from: data)
+                completion(.success(messages))
+            } catch {
+                print("Fetch messages error: \(error)")
+                completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
+    
+    func sendMessage(chatId: UUID, senderId: UUID, content: String, completion: @escaping (Result<Void, SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/messages") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        if let token = accessToken {
+            request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "chat_id": chatId.uuidString,
+            "sender_id": senderId.uuidString,
+            "content": content
+        ]
+        
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                completion(.success(()))
+            } else {
+                completion(.failure(.networkError("Failed to send message")))
+            }
+        }.resume()
+    }
+    
+    func fetchReviews(productId: UUID, completion: @escaping (Result<[Review], SupabaseError>) -> Void) {
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/reviews?product_id=eq.\(productId.uuidString)&select=*") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            guard let data = data else {
+                completion(.failure(.decodingError))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+                decoder.dateDecodingStrategy = .custom { decoder in
+                    let container = try decoder.singleValueContainer()
+                    let dateString = try container.decode(String.self)
+                    if let date = formatter.date(from: dateString) { return date }
+                    formatter.formatOptions = [.withInternetDateTime]
+                    if let date = formatter.date(from: dateString) { return date }
+                    throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date")
+                }
+                let reviews = try decoder.decode([Review].self, from: data)
+                completion(.success(reviews))
+            } catch {
+                print("Fetch reviews error: \(error)")
+                completion(.failure(.decodingError))
+            }
+        }.resume()
+    }
 }
 
 struct OrderResponse: Codable, Identifiable {
@@ -787,5 +1042,6 @@ struct OrderItemResponse: Codable, Identifiable {
         case quantity
         case priceAtPurchase = "price_at_purchase"
     }
+
 }
 

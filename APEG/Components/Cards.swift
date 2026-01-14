@@ -54,8 +54,9 @@ struct PlayActionCard: View {
                     .fill(Theme.cardBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 32)
-                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                            .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
                     )
+                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
             }
         }
     }
@@ -92,8 +93,9 @@ struct QuickActionCard: View {
                     .fill(Theme.cardBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 32)
-                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                            .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
                     )
+                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
             }
         }
     }
@@ -179,12 +181,13 @@ struct TipCard: View {
         }
         .padding(16)
         .background {
-            RoundedRectangle(cornerRadius: 24)
+            RoundedRectangle(cornerRadius: 32)
                 .fill(Theme.cardBackground)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 32)
+                        .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
                 )
+                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
         }
         .frame(width: 240)
     }
@@ -257,11 +260,12 @@ struct CaddieCard: View {
         }
         .padding(16)
         .background(Theme.cardBackground)
-        .cornerRadius(24)
+        .cornerRadius(32)
         .overlay(
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 32)
+                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
     
     private var verticalStyle: some View {
@@ -306,11 +310,12 @@ struct CaddieCard: View {
         }
         .padding(12)
         .background(Theme.cardBackground)
-        .cornerRadius(24)
+        .cornerRadius(32)
         .overlay(
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 32)
+                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -323,8 +328,9 @@ struct ModernCardBackground: View {
             .fill(Theme.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 32)
-                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
             )
+            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -425,8 +431,9 @@ struct ProductCard: View {
         .cornerRadius(32)
         .overlay(
             RoundedRectangle(cornerRadius: 32)
-                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -495,9 +502,9 @@ struct TournamentCard: View {
         .cornerRadius(32)
         .overlay(
             RoundedRectangle(cornerRadius: 32)
-                .stroke(isFeatured ? Theme.primary.opacity(0.3) : Color.white.opacity(0.05), lineWidth: isFeatured ? 2 : 1)
+                .stroke(isFeatured ? Theme.primary.opacity(0.3) : Theme.softGreenBorder.opacity(0.1), lineWidth: isFeatured ? 2 : 1)
         )
-        .shadow(color: isFeatured ? Theme.primary.opacity(0.2) : .clear, radius: 15, x: 0, y: 8)
+        .shadow(color: isFeatured ? Theme.primary.opacity(0.2) : Color.black.opacity(0.3), radius: 15, x: 0, y: 8)
     }
 }
 
@@ -610,7 +617,95 @@ struct MarketingProductCard: View {
         .cornerRadius(32)
         .overlay(
             RoundedRectangle(cornerRadius: 32)
-                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+    }
+}
+
+// MARK: - Golf Course Card
+struct GolfCourseCard: View {
+    let course: GolfCourse
+    
+    var body: some View {
+        ZStack(alignment: .bottomLeading) {
+            // Background Image
+            Image(course.imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 180)
+                .clipped()
+                .overlay(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.black.opacity(0.8), .black.opacity(0.2), .clear]),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                )
+            
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(course.name)
+                        .font(Theme.Typography.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.orange)
+                            .font(.caption)
+                        Text(course.rating)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(BlurView(style: .systemUltraThinMaterialDark))
+                    .cornerRadius(8)
+                }
+                
+                if let description = course.description {
+                    Text(description)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.9))
+                        .lineLimit(2)
+                }
+                
+                if let subCourses = course.subCourses {
+                    HStack(spacing: 6) {
+                        ForEach(subCourses, id: \.self) { sub in
+                            Text(sub)
+                                .font(.system(size: 10, weight: .bold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(Color.white.opacity(0.2))
+                                .cornerRadius(4)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                
+                HStack {
+                    Label(course.location, systemImage: "map.fill")
+                    Spacer()
+                    Label(course.distance, systemImage: "location.fill")
+                }
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+                .padding(.top, 4)
+            }
+            .padding(16)
+        }
+        .background(Theme.cardBackground)
+        .cornerRadius(32)
+        .overlay(
+            RoundedRectangle(cornerRadius: 32)
+                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }

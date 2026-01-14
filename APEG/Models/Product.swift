@@ -1,6 +1,6 @@
 import Foundation
 
-struct Product: Identifiable, Codable {
+struct Product: Codable, Identifiable {
     let id: UUID
     let name: String
     let brand: String?
@@ -9,6 +9,8 @@ struct Product: Identifiable, Codable {
     let category: String?
     let imageUrl: String?
     let stockQuantity: Int?
+    let sellerId: UUID?
+    let images: [String]?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -19,5 +21,7 @@ struct Product: Identifiable, Codable {
         case category
         case imageUrl = "image_url"
         case stockQuantity = "stock_quantity"
+        case sellerId = "seller_id"
+        case images
     }
 }
