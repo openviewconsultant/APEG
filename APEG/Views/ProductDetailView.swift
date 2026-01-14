@@ -70,7 +70,7 @@ struct ProductDetailView: View {
                                     .foregroundColor(.white)
                             }
                             Spacer()
-                            Text("$\(Int(product.price))")
+                            Text(Theme.formatCurrency(product.price))
                                 .font(.system(size: 28, weight: .bold))
                                 .foregroundColor(Theme.primary)
                         }
@@ -162,26 +162,24 @@ struct ProductDetailView: View {
                         Button(action: { quantity += 1 }) { Image(systemName: "plus") }
                     }
                     .foregroundColor(.white)
-                    .padding()
+                    .frame(height: 64)
+                    .padding(.horizontal, 16)
                     .background(Theme.cardBackground)
                     .cornerRadius(20)
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.1)))
                     
                     // Add to Cart
                     Button(action: addToCart) {
-                        HStack {
-                            Text(showAddedToCart ? "¡AÑADIDO!" : "AÑADIR AL CARRITO")
-                                .tracking(1)
-                            Spacer()
-                            Text("$\(Int(product.price * Double(quantity)))")
-                        }
-                        .font(Theme.Typography.button)
-                        .foregroundColor(Theme.deepBlack)
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 18)
-                        .background(showAddedToCart ? Color.green : Theme.primary)
-                        .cornerRadius(32)
-                        .shadow(color: (showAddedToCart ? Color.green : Theme.primary).opacity(0.3), radius: 15, x: 0, y: 8)
+                        Text(showAddedToCart ? "¡AÑADIDO!" : "AÑADIR AL CARRITO")
+                            .tracking(1)
+                            .font(Theme.Typography.button)
+                            .foregroundColor(Theme.deepBlack)
+                            .padding(.horizontal, 24)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 64)
+                            .background(showAddedToCart ? Color.green : Theme.primary)
+                            .cornerRadius(32)
+                            .shadow(color: (showAddedToCart ? Color.green : Theme.primary).opacity(0.3), radius: 15, x: 0, y: 8)
                     }
                 }
                 .padding()

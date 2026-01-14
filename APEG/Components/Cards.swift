@@ -49,15 +49,7 @@ struct PlayActionCard: View {
                 }
             }
             .padding(24)
-            .background {
-                RoundedRectangle(cornerRadius: 32)
-                    .fill(Theme.cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 32)
-                            .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-            }
+            .background(ModernCardBackground())
         }
     }
 }
@@ -88,15 +80,7 @@ struct QuickActionCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
-            .background {
-                RoundedRectangle(cornerRadius: 32)
-                    .fill(Theme.cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 32)
-                            .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-            }
+            .background(ModernCardBackground())
         }
     }
 }
@@ -109,8 +93,7 @@ struct PromoBannerCard: View {
     
     var body: some View {
         ZStack(alignment: .leading) {
-            RoundedRectangle(cornerRadius: 32)
-                .fill(Theme.cardBackground)
+            ModernCardBackground()
             
             VStack(alignment: .leading, spacing: 12) {
                 Text("OFERTA ESPECIAL")
@@ -126,7 +109,7 @@ struct PromoBannerCard: View {
                     Text(title)
                         .font(Theme.Typography.title1)
                         .foregroundColor(.white)
-                    Text(price)
+                    Text(Theme.formatCurrency(Double(price) ?? 0))
                         .font(Theme.Typography.title2)
                         .foregroundColor(Theme.secondary)
                 }
@@ -180,15 +163,7 @@ struct TipCard: View {
             Spacer()
         }
         .padding(16)
-        .background {
-            RoundedRectangle(cornerRadius: 32)
-                .fill(Theme.cardBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 32)
-                        .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-                )
-                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-        }
+        .background(ModernCardBackground())
         .frame(width: 240)
     }
 }
@@ -250,7 +225,7 @@ struct CaddieCard: View {
             }
             
             VStack(alignment: .trailing) {
-                Text("$\(price)")
+                Text(Theme.formatCurrency(Double(price)))
                     .font(Theme.Typography.title3)
                 Text("/ronda")
                     .font(.system(size: 10))
@@ -258,14 +233,7 @@ struct CaddieCard: View {
             }
             .foregroundColor(.white)
         }
-        .padding(16)
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
     
     private var verticalStyle: some View {
@@ -298,7 +266,7 @@ struct CaddieCard: View {
                     .foregroundColor(.white.opacity(0.5))
                 
                 HStack {
-                    Text("$\(price)")
+                    Text(Theme.formatCurrency(Double(price)))
                         .font(Theme.Typography.body)
                         .foregroundColor(Theme.secondary)
                     Text("/h")
@@ -328,9 +296,9 @@ struct ModernCardBackground: View {
             .fill(Theme.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 32)
-                    .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
+                    .stroke(Theme.vibrantGreen.opacity(0.3), lineWidth: 1.5)
             )
-            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+            .shadow(color: Theme.Shadows.floating.color, radius: Theme.Shadows.floating.radius, x: Theme.Shadows.floating.x, y: Theme.Shadows.floating.y)
     }
 }
 
@@ -410,7 +378,7 @@ struct ProductCard: View {
                     .lineLimit(1)
                 
                 HStack {
-                    Text("$\(String(format: "%.0f", price))")
+                    Text(Theme.formatCurrency(price))
                         .font(Theme.Typography.body)
                         .foregroundColor(Theme.secondary)
                         .fontWeight(.black)
@@ -478,7 +446,7 @@ struct TournamentCard: View {
                     Text(date)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(Theme.secondary)
-                    Text("$\(fee)")
+                    Text(Theme.formatCurrency(Double(fee)))
                         .font(Theme.Typography.title3)
                         .foregroundColor(.white)
                 }
@@ -497,14 +465,7 @@ struct TournamentCard: View {
                 }
             }
         }
-        .padding(20)
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(isFeatured ? Theme.primary.opacity(0.3) : Theme.softGreenBorder.opacity(0.1), lineWidth: isFeatured ? 2 : 1)
-        )
-        .shadow(color: isFeatured ? Theme.primary.opacity(0.2) : Color.black.opacity(0.3), radius: 15, x: 0, y: 8)
+        .background(ModernCardBackground())
     }
 }
 
@@ -590,7 +551,7 @@ struct MarketingProductCard: View {
                         Text("Precio")
                             .font(.caption2)
                             .foregroundColor(.white.opacity(0.5))
-                        Text("$\(String(format: "%.0f", price))")
+                        Text(Theme.formatCurrency(price))
                             .font(.title3)
                             .fontWeight(.black)
                             .foregroundColor(.white)

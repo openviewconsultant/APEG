@@ -12,12 +12,21 @@ struct Theme {
     static let pureWhite = Color.white
     static let lightGray = Color.white.opacity(0.6)
     
+    static let vibrantGreen = Color(hex: "00FF7F") // Premium Golf Green
+    
     struct Shadows {
         struct soft {
             static let color = Color.black.opacity(0.05)
             static let radius: CGFloat = 10
             static let x: CGFloat = 0
             static let y: CGFloat = 5
+        }
+        
+        struct floating {
+            static let color = Color.black.opacity(0.4)
+            static let radius: CGFloat = 20
+            static let x: CGFloat = 0
+            static let y: CGFloat = 10
         }
     }
     
@@ -32,6 +41,19 @@ struct Theme {
         static let footnote = Font.system(size: 13, weight: .regular, design: .rounded)
         static let caption = Font.system(size: 12, weight: .medium, design: .rounded)
         static let button = Font.system(size: 16, weight: .bold, design: .rounded)
+    }
+    
+    // Currency Formatter for COP
+    static func formatCurrency(_ amount: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "$"
+        formatter.groupingSeparator = "."
+        formatter.decimalSeparator = ","
+        formatter.maximumFractionDigits = 0
+        formatter.locale = Locale(identifier: "es_CO")
+        
+        return formatter.string(from: NSNumber(value: amount)) ?? "$\(Int(amount))"
     }
 }
 

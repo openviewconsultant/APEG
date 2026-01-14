@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct ShopView: View {
-    @State private var products: [Product] = []
     @State private var isLoading = true
-    @State private var isPremium = false
+    @AppStorage("isPremiumUser") private var isPremium = false
     @State private var showAddProduct = false
+    @State private var products: [Product] = []
     
     @StateObject private var cartManager = CartManager.shared
     @State private var showCart = false

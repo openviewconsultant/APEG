@@ -42,7 +42,7 @@ struct CartView: View {
                             Text("Total")
                                 .font(Theme.Typography.title3)
                             Spacer()
-                            Text("$\(Int(cartManager.total))")
+                            Text(Theme.formatCurrency(cartManager.total))
                                 .font(Theme.Typography.title2)
                                 .foregroundColor(Theme.primary)
                         }
@@ -108,7 +108,7 @@ struct CartItemRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.product.name)
                     .font(Theme.Typography.body)
-                Text("$\(Int(item.product.price))")
+                Text(Theme.formatCurrency(item.product.price))
                     .font(.caption)
                     .foregroundColor(Theme.primary)
                 
@@ -187,7 +187,7 @@ struct CheckoutView: View {
                         Text("Subtotal")
                             .font(Theme.Typography.body)
                         Spacer()
-                        Text("$\(Int(cartManager.total))")
+                        Text(Theme.formatCurrency(cartManager.total))
                     }
                     HStack {
                         Text("Envío")
@@ -199,7 +199,7 @@ struct CheckoutView: View {
                         Text("Total")
                             .font(Theme.Typography.headline)
                         Spacer()
-                        Text("$\(Int(cartManager.total))")
+                        Text(Theme.formatCurrency(cartManager.total))
                             .font(Theme.Typography.title2)
                             .foregroundColor(Theme.primary)
                     }
@@ -381,7 +381,7 @@ struct OrderRow: View {
                     .font(Theme.Typography.body)
                     .foregroundColor(.secondary)
                 Spacer()
-                Text("Total: $\(Int(order.totalAmount))")
+                Text("Total: \(Theme.formatCurrency(order.totalAmount))")
                     .font(Theme.Typography.headline)
                     .foregroundColor(Theme.primary)
             }

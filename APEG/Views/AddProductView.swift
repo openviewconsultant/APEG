@@ -20,96 +20,120 @@ struct AddProductView: View {
 
     
     let categories = ["Bolas", "Palos", "Calzado", "Tecnología", "Accesorios", "Ropa"]
+    @AppStorage("isPremiumUser") private var isPremium = false
     
     var body: some View {
         NavigationView {
-            Form {
-                Section(header: Text("Información Básica")) {
-                    TextField("Nombre del Producto", text: $name)
-                    TextField("Marca", text: $brand)
-                    TextField("Precio", text: $price)
-                        .keyboardType(.decimalPad)
-                    
-                    Picker("Categoría", selection: $category) {
-                        Text("Seleccionar").tag("")
-                        ForEach(categories, id: \.self) { cat in
-                            Text(cat).tag(cat)
+            Group {
+                if !isPremium {
+                    VStack(spacing: 20) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.orange)
+                        Text("Membresía Gold Requerida")
+                            .font(Theme.Typography.title2)
+                            .foregroundColor(.white)
+                        Text("Solo los socios Gold pueden publicar productos en la tienda.")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                        Button("Cerrar") {
+                            presentationMode.wrappedValue.dismiss()
                         }
+                        .padding()
+                        .background(Theme.primary)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
                     }
-                }
-                
-                // Sección de Imagen
-                Section(header: Text("Imagen del Producto")) {
-                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                        HStack {
-                            Image(systemName: "photo.on.rectangle.angled")
-                                .foregroundColor(.accentColor)
-                            Text(selectedImage == nil ? "Seleccionar Imagen" : "Cambiar Imagen")
-                            Spacer()
-                            if isUploadingImage {
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .onChange(of: selectedPhotoItem) { oldValue, newItem in
-                        Task {
-                            if let data = try? await newItem?.loadTransferable(type: Data.self),
-                               let uiImage = UIImage(data: data) {
-                                selectedImage = uiImage
-                            }
-                        }
-                    }
-                    
-                    // Preview de la imagen
-                    if let image = selectedImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 200)
-                            .cornerRadius(8)
-                    }
-                }
-                
-                Section(header: Text("Detalles")) {
-
-                    TextField("Cantidad en Stock", text: $stock)
-                        .keyboardType(.numberPad)
-                    TextEditor(text: $description)
-                        .frame(height: 100)
-                        .overlay(
-                            Group {
-                                if description.isEmpty {
-                                    Text("Descripción del producto...")
-                                        .foregroundColor(.gray.opacity(0.5))
-                                        .padding(.leading, 4)
-                                        .padding(.top, 8)
-                                        .allowsHitTesting(false)
+                } else {
+                    Form {
+                        Section(header: Text("Información Básica")) {
+                            TextField("Nombre del Producto", text: $name)
+                            TextField("Marca", text: $brand)
+                            TextField("Precio", text: $price)
+                                .keyboardType(.decimalPad)
+                            
+                            Picker("Categoría", selection: $category) {
+                                Text("Seleccionar").tag("")
+                                ForEach(categories, id: \.self) { cat in
+                                    Text(cat).tag(cat)
                                 }
-                            },
-                        alignment: .topLeading
-                        )
-                }
-                
-                if let error = errorMessage {
-                    Section {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(Theme.Typography.caption)
-                    }
-                }
-                
-                Section {
-                    Button(action: saveProduct) {
-                        if isSaving {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                        } else {
-                            Text("Guardar Producto")
-                                .font(Theme.Typography.button)
-                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        
+                        // Sección de Imagen
+                        Section(header: Text("Imagen del Producto")) {
+                            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                                HStack {
+                                    Image(systemName: "photo.on.rectangle.angled")
+                                        .foregroundColor(.accentColor)
+                                    Text(selectedImage == nil ? "Seleccionar Imagen" : "Cambiar Imagen")
+                                    Spacer()
+                                    if isUploadingImage {
+                                        ProgressView()
+                                    }
+                                }
+                            }
+                            .onChange(of: selectedPhotoItem) { oldValue, newItem in
+                                Task {
+                                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                                       let uiImage = UIImage(data: data) {
+                                        selectedImage = uiImage
+                                    }
+                                }
+                            }
+                            
+                            // Preview de la imagen
+                            if let image = selectedImage {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxHeight: 200)
+                                    .cornerRadius(8)
+                            }
+                        }
+                        
+                        Section(header: Text("Detalles")) {
+                            TextField("Cantidad en Stock", text: $stock)
+                                .keyboardType(.numberPad)
+                            TextEditor(text: $description)
+                                .frame(height: 100)
+                                .overlay(
+                                    Group {
+                                        if description.isEmpty {
+                                            Text("Descripción del producto...")
+                                                .foregroundColor(.gray.opacity(0.5))
+                                                .padding(.leading, 4)
+                                                .padding(.top, 8)
+                                                .allowsHitTesting(false)
+                                        }
+                                    },
+                                    alignment: .topLeading
+                                )
+                        }
+                        
+                        if let error = errorMessage {
+                            Section {
+                                Text(error)
+                                    .foregroundColor(.red)
+                                    .font(Theme.Typography.caption)
+                            }
+                        }
+                        
+                        Section {
+                            Button(action: saveProduct) {
+                                if isSaving {
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity)
+                                } else {
+                                    Text("Guardar Producto")
+                                        .font(Theme.Typography.button)
+                                        .frame(maxWidth: .infinity)
+                                }
+                            }
+                            .disabled(name.isEmpty || price.isEmpty || isSaving)
                         }
                     }
-                    .disabled(name.isEmpty || price.isEmpty || isSaving)
                 }
             }
             .navigationTitle("Nuevo Producto")

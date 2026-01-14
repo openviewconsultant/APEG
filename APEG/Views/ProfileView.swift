@@ -5,6 +5,7 @@ struct ProfileView: View {
     
     // State for user profile
     @State private var profile: UserProfile?
+    @AppStorage("isPremiumUser") private var isPremium = false
     @State private var isLoading = true
     
     var body: some View {
@@ -153,6 +154,8 @@ struct ProfileView: View {
     
     private func togglePremiumStatus() {
         guard let currentProfile = profile else { return }
+        let newStatus = !(currentProfile.isPremium ?? false)
+        self.isPremium = newStatus
         self.profile = UserProfile(
             id: currentProfile.id,
             fullName: currentProfile.fullName,
@@ -160,7 +163,7 @@ struct ProfileView: View {
             idPhotoUrl: currentProfile.idPhotoUrl,
             updatedAt: currentProfile.updatedAt,
             email: currentProfile.email,
-            isPremium: !(currentProfile.isPremium ?? false)
+            isPremium: newStatus
         )
     }
     
@@ -171,6 +174,7 @@ struct ProfileView: View {
                 switch result {
                 case .success(let data):
                     self.profile = data
+                    self.isPremium = data.isPremium ?? false
                 case .failure(let error):
                     print("Error loading profile: \(error)")
                     // Fallback mock for testing UI if needed
