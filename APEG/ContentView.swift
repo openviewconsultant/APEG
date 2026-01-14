@@ -13,6 +13,16 @@ struct ContentView: View {
     var body: some View {
         if isLoggedIn {
             MainTabView()
+                .onAppear {
+                    // Pre-emptively refresh token if we have one
+                    SupabaseManager.shared.refreshSession { result in
+                        if case .failure = result {
+                            // If refresh fails, we might still be able to use current token 
+                            // or we might need to logout. For safety, let's just log failure.
+                            print("Refreshing session failed or not needed")
+                        }
+                    }
+                }
         } else {
             AuthView()
         }

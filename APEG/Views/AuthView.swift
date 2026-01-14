@@ -23,15 +23,15 @@ struct AuthView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 40) {
                     // Branding
-                    VStack(spacing: 12) {
-                        Image(systemName: "laurel.leading")
-                            .font(.system(size: 70))
-                            .foregroundColor(.white)
-                        
-                        Text("APEG")
-                            .font(.system(size: 42, weight: .black, design: .serif))
-                            .foregroundColor(.white)
-                            .tracking(5)
+                    VStack(spacing: 20) {
+                        Image("apeg_logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 140, height: 140)
+                            .padding(20)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.15), radius: 15, x: 0, y: 8)
                         
                         Text(isRegistering ? "ÚNETE AL CLUB" : "BIENVENIDO AL CLUB")
                             .font(.caption)

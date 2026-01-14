@@ -19,6 +19,11 @@ class SupabaseManager {
         set { UserDefaults.standard.set(newValue, forKey: "supabaseUserId") }
     }
     
+    var refreshToken: String? {
+        get { UserDefaults.standard.string(forKey: "supabaseRefreshToken") }
+        set { UserDefaults.standard.set(newValue, forKey: "supabaseRefreshToken") }
+    }
+    
     enum SupabaseError: Error {
         case invalidURL
         case networkError(String)
@@ -60,17 +65,29 @@ class SupabaseManager {
             }
             
             if (200...299).contains(httpResponse.statusCode) {
-                // Success - If there's an image, upload it
-                if let image = idImage, let data = data,
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let user = json["user"] as? [String: Any],
-                   let userId = user["id"] as? String {
-                    self.uploadIDPhoto(userId: userId, image: image) { _ in
-                        completion(.success(true))
+                // Success - Store tokens if present
+                if let data = data,
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let accessToken = json["access_token"] as? String {
+                        self.accessToken = accessToken
                     }
-                } else {
-                    completion(.success(true))
+                    if let refreshToken = json["refresh_token"] as? String {
+                        self.refreshToken = refreshToken
+                    }
+                    if let user = json["user"] as? [String: Any],
+                       let userId = user["id"] as? String {
+                        self.currentUserId = userId
+                        
+                        // If there's an image, upload it
+                        if let image = idImage {
+                            self.uploadIDPhoto(userId: userId, image: image) { _ in
+                                completion(.success(true))
+                            }
+                            return
+                        }
+                    }
                 }
+                completion(.success(true))
             } else {
                 if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                     let message = json["msg"] as? String ?? "Unknown error"
@@ -120,6 +137,7 @@ class SupabaseManager {
                     
                     self.accessToken = accessToken
                     self.currentUserId = userId
+                    self.refreshToken = json["refresh_token"] as? String
                     completion(.success(true))
                 } else {
                     // Fallback if structure is different, though this is standard Supabase
@@ -134,6 +152,61 @@ class SupabaseManager {
                 }
             }
         }.resume()
+    }
+    
+    func refreshSession(completion: @escaping (Result<Bool, SupabaseError>) -> Void) {
+        guard let refreshToken = refreshToken else {
+            completion(.failure(.authError("No refresh token available")))
+            return
+        }
+        
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=refresh_token") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body = ["refresh_token": refreshToken]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error.localizedDescription)))
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(.networkError("Invalid response")))
+                return
+            }
+            
+            if (200...299).contains(httpResponse.statusCode) {
+                if let data = data,
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let newAccessToken = json["access_token"] as? String,
+                   let newRefreshToken = json["refresh_token"] as? String {
+                    
+                    self.accessToken = newAccessToken
+                    self.refreshToken = newRefreshToken
+                    completion(.success(true))
+                } else {
+                    completion(.failure(.decodingError))
+                }
+            } else {
+                completion(.failure(.authError("Failed to refresh session")))
+            }
+        }.resume()
+    }
+    
+    func signOut() {
+        self.accessToken = nil
+        self.refreshToken = nil
+        self.currentUserId = nil
+        UserDefaults.standard.set(false, forKey: "isLoggedIn")
     }
     
     private func uploadIDPhoto(userId: String, image: UIImage, completion: @escaping (Result<String, SupabaseError>) -> Void) {

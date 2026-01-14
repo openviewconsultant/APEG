@@ -104,6 +104,17 @@ struct HomeView: View {
             
             Spacer()
             
+            Image("apeg_logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 38, height: 38)
+                .padding(6)
+                .background(Color.white)
+                .clipShape(Circle())
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            
+            Spacer()
+            
             HStack(spacing: 18) {
                 VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 6) {
@@ -199,6 +210,7 @@ struct HomeView: View {
                 color: .black
             )
             .padding(.horizontal)
+            .padding(.vertical, 12)
             
             PromoBannerCard(
                 tag: "Oferta Especial",
@@ -208,6 +220,7 @@ struct HomeView: View {
                 color: Color(hex: "1A1A1A")
             )
             .padding(.horizontal)
+            .padding(.vertical, 12)
             
             PromoBannerCard(
                 tag: "Exclusivo",
@@ -217,8 +230,9 @@ struct HomeView: View {
                 color: Color(hex: "0D0D0D")
             )
             .padding(.horizontal)
+            .padding(.vertical, 12)
         }
-        .frame(height: 200)
+        .frame(height: 240)
         .tabViewStyle(.page(indexDisplayMode: .always))
     }
 }

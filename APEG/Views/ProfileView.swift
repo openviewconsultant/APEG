@@ -111,6 +111,7 @@ struct ProfileView: View {
                         
                         // Logout Button
                         Button(action: {
+                            SupabaseManager.shared.signOut()
                             isLoggedIn = false
                         }) {
                             HStack {

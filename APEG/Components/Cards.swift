@@ -453,11 +453,12 @@ struct PromoBannerCard: View {
                                 .stroke(Color.white.opacity(0.5), lineWidth: 1)
                         )
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(title)
                             .font(Theme.Typography.title2)
                             .foregroundColor(Theme.deepBlack)
                             .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                         
                         Text(price)
                             .font(Theme.Typography.title3)
@@ -482,15 +483,17 @@ struct PromoBannerCard: View {
                     }
                     .padding(.top, 5)
                 }
-                .padding(32)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 16)
+                .padding(.bottom, 20) // Extra space at bottom for TabView indicators
                 
                 Spacer()
                 
                 Image(systemName: imageName)
-                    .font(.system(size: 120))
-                    .foregroundColor(Theme.deepBlack.opacity(0.07))
+                    .font(.system(size: 100))
+                    .foregroundColor(Theme.deepBlack.opacity(0.04))
                     .rotationEffect(.degrees(-15))
-                    .offset(x: 10, y: 15)
+                    .offset(x: 10, y: 0)
             }
         }
     }
