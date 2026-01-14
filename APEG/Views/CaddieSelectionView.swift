@@ -28,7 +28,7 @@ struct CaddieSelectionView: View {
                     
                     Text("Caddies Disponibles")
                         .font(Theme.Typography.title3)
-                        .foregroundColor(Color(hex: "1A1A1A"))
+                        .foregroundColor(.white)
                         .padding(.horizontal)
                     
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
@@ -93,7 +93,7 @@ struct CaddieSelectionView: View {
             
             Text("Seleccionar Caddie")
                 .font(Theme.Typography.title3)
-                .foregroundColor(Color(hex: "1A1A1A"))
+                .foregroundColor(.white)
             
             Spacer()
             
@@ -104,7 +104,7 @@ struct CaddieSelectionView: View {
             }
         }
         .padding()
-        .background(Theme.pureWhite)
+        .background(Theme.background)
     }
     
     private var locationSummary: some View {
@@ -121,7 +121,7 @@ struct CaddieSelectionView: View {
                     .foregroundColor(.secondary)
                 Text("Pebble Beach • Mañana, 8:00 AM")
                     .font(Theme.Typography.body)
-                    .foregroundColor(Color(hex: "1A1A1A"))
+                    .foregroundColor(.white)
             }
             
             Spacer()
@@ -132,7 +132,7 @@ struct CaddieSelectionView: View {
             .foregroundColor(Theme.primary)
         }
         .padding(16)
-        .background(Theme.pureWhite)
+        .background(Theme.cardBackground)
         .cornerRadius(24)
         .padding(.horizontal)
         .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
@@ -147,8 +147,8 @@ struct CaddieSelectionView: View {
                             .font(.system(size: 12, weight: .bold))
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
-                            .background(selectedFilter == filter ? Color.black : Color.white)
-                            .foregroundColor(selectedFilter == filter ? .white : .black)
+                            .background(selectedFilter == filter ? Theme.primary : Theme.cardBackground)
+                            .foregroundColor(.white)
                             .cornerRadius(10)
                             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                     }

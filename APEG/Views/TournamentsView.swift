@@ -13,16 +13,16 @@ struct TournamentsView: View {
                     HStack {
                         Text("Torneos")
                             .font(Theme.Typography.largeTitle)
-                            .foregroundColor(Theme.deepBlack)
+                            .foregroundColor(.white)
                         Spacer()
                         Button(action: {}) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(Theme.deepBlack)
+                                .foregroundColor(.white)
                                 .padding(12)
-                                .background(Theme.pureWhite)
+                                .background(Theme.cardBackground)
                                 .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 5)
+                                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
                         }
                     }
                     .padding(.horizontal, 25)
@@ -39,10 +39,10 @@ struct TournamentsView: View {
                                         .font(Theme.Typography.button)
                                         .padding(.horizontal, 28)
                                         .padding(.vertical, 14)
-                                        .background(selectedFilter == filter ? Theme.primary : Color.white)
-                                        .foregroundColor(selectedFilter == filter ? .white : .black.opacity(0.6))
+                                        .background(selectedFilter == filter ? Theme.primary : Theme.cardBackground)
+                                        .foregroundColor(.white)
                                         .cornerRadius(18)
-                                        .shadow(color: selectedFilter == filter ? Theme.primary.opacity(0.3) : .black.opacity(0.03), radius: 10, x: 0, y: 5)
+                                        .shadow(color: selectedFilter == filter ? Theme.primary.opacity(0.3) : .black.opacity(0.1), radius: 10, x: 0, y: 5)
                                 }
                             }
                         }
@@ -92,7 +92,7 @@ struct TournamentsView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 14)
-                            .background(Theme.deepBlack)
+                            .background(Theme.primary)
                             .cornerRadius(15)
                             .padding(.top, 5)
                         }
@@ -115,7 +115,7 @@ struct TournamentsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(weatherManager.condition)
                                     .font(Theme.Typography.title2)
-                                    .foregroundColor(Theme.deepBlack)
+                                    .foregroundColor(.white)
                                 Text("\(weatherManager.temperature) • Vientos 8km/h")
                                     .font(Theme.Typography.caption)
                                     .foregroundColor(.secondary)
@@ -183,9 +183,12 @@ struct TournamentsView: View {
                     }
                     .padding(24)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Theme.pureWhite)
+                    .background(Theme.cardBackground)
                     .cornerRadius(32)
-                    .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 32)
+                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    )
                 }
                 .padding(.horizontal)
             }

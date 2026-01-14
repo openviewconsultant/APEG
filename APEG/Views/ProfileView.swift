@@ -8,104 +8,75 @@ struct ProfileView: View {
     @State private var isLoading = true
     
     var body: some View {
-        NavigationView {
+        ZStack {
+            Theme.background.ignoresSafeArea()
+            
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 32) {
                     // Header / Profile Info
                     if isLoading {
                         VStack(spacing: 16) {
                             Circle()
-                                .fill(Color.gray.opacity(0.1))
+                                .fill(Color.white.opacity(0.05))
                                 .frame(width: 100, height: 100)
                                 .overlay(ProgressView())
                             
-                            VStack(spacing: 4) {
+                            VStack(spacing: 8) {
                                 RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.gray.opacity(0.1))
+                                    .fill(Color.white.opacity(0.1))
                                     .frame(width: 150, height: 24)
                                 RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.gray.opacity(0.1))
+                                    .fill(Color.white.opacity(0.1))
                                     .frame(width: 100, height: 14)
                             }
                         }
-                        .padding(.top, 20)
+                        .padding(.top, 40)
                     } else {
-                        VStack(spacing: 16) {
+                        VStack(spacing: 20) {
                             ZStack {
                                 Circle()
-                                    .fill(LinearGradient(colors: [Theme.primary, Theme.primary.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .frame(width: 100, height: 100)
+                                    .fill(LinearGradient(colors: [Theme.primary, Theme.secondary], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .frame(width: 110, height: 110)
                                 
-                                if let photoUrl = profile?.idPhotoUrl, !photoUrl.isEmpty {
-                                    // In a real app we would load the image from URL.
-                                    // For now, we fall back to initials.
-                                    Text(getInitials(name: profile?.fullName))
-                                        .font(Font.system(size: 34, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                } else {
-                                    Text(getInitials(name: profile?.fullName))
-                                        .font(Font.system(size: 34, weight: .bold, design: .rounded))
-                                        .foregroundColor(.white)
-                                }
+                                Text(getInitials(name: profile?.fullName))
+                                    .font(.system(size: 38, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
                             }
-                            .shadow(color: Theme.primary.opacity(0.3), radius: 10, x: 0, y: 5)
+                            .shadow(color: Theme.primary.opacity(0.3), radius: 20, x: 0, y: 10)
                             
                             VStack(spacing: 4) {
                                 Text(profile?.fullName ?? "Usuario")
                                     .font(Theme.Typography.title2)
-                                if profile?.isPremium == true {
-                                    Text("Miembro Premium") 
-                                        .font(Theme.Typography.button)
-                                        .foregroundColor(Theme.primary)
-                                } else {
-                                    Text("Miembro Estándar")
-                                        .font(Theme.Typography.body)
-                                        .foregroundColor(.secondary)
-                                }
+                                    .foregroundColor(.white)
+                                
+                                Text(profile?.isPremium == true ? "Socio de Oro" : "Socio")
+                                    .font(Theme.Typography.subheadline)
+                                    .foregroundColor(Theme.primary)
+                                    .fontWeight(.bold)
                             }
                         }
-                        .padding(.top, 20)
+                        .padding(.top, 40)
                     }
                     
                     // Stats Grid
-                    // These could also be fetched in the future
-                    HStack(spacing: 20) {
+                    HStack(spacing: 15) {
                         ProfileStatItem(title: "Handicap", value: "5.4")
                         ProfileStatItem(title: "Rondas", value: "128")
                         ProfileStatItem(title: "Torneos", value: "12")
                     }
-                    .padding(.horizontal, 25)
+                    .padding(.horizontal, 20)
                     
                     // Menu Sections
                     VStack(spacing: 30) {
-                        ProfileMenuSection(title: "MI JUEGO") {
-                            NavigationLink(destination: GameStatsView()) {
-                                ProfileMenuRowContent(icon: "figure.golf", title: "Estadísticas de Juego", color: .blue)
-                            }
-                            Divider()
-                                .padding(.leading, 68)
-                                .opacity(0.5)
-                            
+                        ProfileMenuSection(title: "MI ACTIVIDAD") {
+                            ProfileMenuRow(icon: "figure.golf", title: "Estadísticas", color: Theme.secondary)
                             ProfileMenuRow(icon: "trophy", title: "Mis Torneos", color: .orange)
-                            
-                            Divider()
-                                .padding(.leading, 68)
-                                .opacity(0.5)
-                            
-                            NavigationLink(destination: MyOrdersView()) {
-                                ProfileMenuRowContent(icon: "bag", title: "Mis Pedidos", color: .green)
-                            }
+                            ProfileMenuRow(icon: "bag", title: "Mis Pedidos", color: Theme.primary)
                         }
                         
-                        ProfileMenuSection(title: "CUENTA") {
-                             NavigationLink(destination: PersonalDataView()) {
-                                 ProfileMenuRowContent(icon: "person", title: "Datos Personales", color: .gray)
-                             }
-                             Divider()
-                                 .padding(.leading, 68)
-                                 .opacity(0.5)
- 
-                            ProfileMenuRow(icon: "creditcard", title: "Métodos de Pago", color: .purple)
+                        ProfileMenuSection(title: "PREFERENCIAS") {
+                            ProfileMenuRow(icon: "person", title: "Datos Personales", color: .gray)
+                            ProfileMenuRow(icon: "creditcard", title: "Pagos", color: .purple)
                             ProfileMenuRow(icon: "bell", title: "Notificaciones", color: .red)
                         }
                         
@@ -115,46 +86,22 @@ struct ProfileView: View {
                             isLoggedIn = false
                         }) {
                             HStack {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
+                                Image(systemName: "power")
                                 Text("Cerrar Sesión")
                                     .font(Theme.Typography.button)
                             }
-                            .foregroundColor(.red)
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 18)
-                            .background(Color.red.opacity(0.1))
-                            .cornerRadius(20)
+                            .background(Color.red.opacity(0.8))
+                            .cornerRadius(24)
+                            .shadow(color: .red.opacity(0.3), radius: 10, x: 0, y: 5)
                         }
                         .padding(.horizontal, 25)
                         .padding(.top, 10)
                     }
                 }
-                .padding(.bottom, 120) // Space for tab bar
-            }
-            .background(Theme.background.ignoresSafeArea())
-            .navigationBarHidden(true)
-            .onAppear {
-                checkProfile()
-            }
-        }
-    }
-    
-    private func checkProfile() {
-        if profile == nil {
-            loadProfile()
-        }
-    }
-    
-    private func loadProfile() {
-        SupabaseManager.shared.fetchProfile { result in
-            DispatchQueue.main.async {
-                self.isLoading = false
-                switch result {
-                case .success(let data):
-                    self.profile = data
-                case .failure(let error):
-                    print("Error loading profile: \(error)")
-                }
+                .padding(.bottom, 120)
             }
         }
     }
@@ -174,17 +121,22 @@ struct ProfileStatItem: View {
     let value: String
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             Text(value)
                 .font(Theme.Typography.title3)
-                .foregroundColor(Theme.deepBlack)
+                .foregroundColor(.white)
             Text(title)
                 .font(Theme.Typography.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.4))
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
-        .background(ModernCardBackground())
+        .padding(.vertical, 20)
+        .background(Theme.cardBackground)
+        .cornerRadius(24)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+        )
     }
 }
 
@@ -198,20 +150,23 @@ struct ProfileMenuSection<Content: View>: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(title)
-                .font(Theme.Typography.headline)
-                .kerning(1.2)
-                .foregroundColor(.secondary.opacity(0.7))
+                .font(Theme.Typography.caption)
+                .kerning(1.5)
+                .foregroundColor(.white.opacity(0.4))
                 .padding(.horizontal, 30)
             
             VStack(spacing: 0) {
                 content
             }
-            .background(Theme.pureWhite)
-            .cornerRadius(24)
-            .padding(.horizontal, 25)
-            .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
+            .background(Theme.cardBackground)
+            .cornerRadius(32)
+            .overlay(
+                RoundedRectangle(cornerRadius: 32)
+                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+            )
+            .padding(.horizontal, 20)
         }
     }
 }
@@ -223,45 +178,28 @@ struct ProfileMenuRow: View {
     
     var body: some View {
         Button(action: {}) {
-            ProfileMenuRowContent(icon: icon, title: title, color: color)
-        }
-        Divider()
-            .padding(.leading, 68)
-            .opacity(0.5)
-    }
-}
-
-struct ProfileMenuRowContent: View {
-    let icon: String
-    let title: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 16) {
+            HStack(spacing: 16) {
                 ZStack {
                     Circle()
                         .fill(color.opacity(0.1))
-                        .frame(width: 36, height: 36)
+                        .frame(width: 40, height: 40)
                     Image(systemName: icon)
                         .foregroundColor(color)
-                        .font(Theme.Typography.body)
+                        .font(.system(size: 16, weight: .bold))
                 }
                 
                 Text(title)
                     .font(Theme.Typography.body)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.white)
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .font(Theme.Typography.button)
-                    .foregroundColor(.gray.opacity(0.4))
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white.opacity(0.2))
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+        }
     }
-}
-
-#Preview {
-    ProfileView()
 }

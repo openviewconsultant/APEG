@@ -21,7 +21,7 @@ struct ShopView: View {
                     HStack {
                         Text("Tienda Pro")
                             .font(Theme.Typography.largeTitle)
-                            .foregroundColor(Theme.deepBlack)
+                            .foregroundColor(.white)
                         Spacer()
                         
                         if isPremium {
@@ -37,11 +37,11 @@ struct ShopView: View {
                             ZStack(alignment: .topTrailing) {
                                 Image(systemName: "cart")
                                     .font(.title3)
-                                    .foregroundColor(Theme.deepBlack)
+                                    .foregroundColor(.white)
                                     .padding(10)
-                                    .background(Theme.pureWhite)
+                                    .background(Theme.cardBackground)
                                     .clipShape(Circle())
-                                    .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
                                 
                                 if cartManager.itemCount > 0 {
                                     Text("\(cartManager.itemCount)")

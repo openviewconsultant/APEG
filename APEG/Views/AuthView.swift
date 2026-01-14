@@ -16,22 +16,24 @@ struct AuthView: View {
     
     var body: some View {
         ZStack {
-            // Background Layer
-            LinearGradient(colors: [Theme.primary.opacity(0.8), .black], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Theme.background
                 .ignoresSafeArea()
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 40) {
                     // Branding
                     VStack(spacing: 20) {
-                        Image("apeg_logo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 140, height: 140)
-                            .padding(20)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.15), radius: 15, x: 0, y: 8)
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 160, height: 160)
+                                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+                            
+                            Image("apeg_logo")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 140, height: 140)
+                        }
                         
                         Text(isRegistering ? "ÚNETE AL CLUB" : "BIENVENIDO AL CLUB")
                             .font(.caption)
@@ -152,12 +154,6 @@ struct AuthView: View {
                         }
                     }
                     .padding(30)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(32)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 32)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                    )
                     .padding(.horizontal, 20)
                     
                     Text("La excelencia está en cada detalle.")
@@ -260,13 +256,13 @@ struct CustomTextField: View {
                 TextField("", text: $text, prompt: Text(placeholder).foregroundColor(.white.opacity(0.4)))
             }
         }
-        .padding()
-        .background(Color.white.opacity(0.1))
-        .cornerRadius(12)
+        .padding(20)
+        .background(Theme.cardBackground)
+        .cornerRadius(20)
         .foregroundColor(.white)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
         )
     }
 }

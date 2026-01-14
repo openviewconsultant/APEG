@@ -6,7 +6,7 @@ struct GreenFeesView: View {
             VStack(alignment: .leading, spacing: 24) {
                 Text("Reservar Green Fee")
                     .font(Theme.Typography.largeTitle)
-                    .foregroundColor(Theme.deepBlack)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 25)
                 
                 VStack(spacing: 25) {
@@ -36,10 +36,10 @@ struct GreenFeesView: View {
                     
                     // Featured Courses
                     VStack(alignment: .leading, spacing: 20) {
-                    Text("Campos Recomendados")
-                        .font(Theme.Typography.title3)
-                        .foregroundColor(Theme.deepBlack)
-                        .padding(.horizontal, 25)
+                        Text("Campos Recomendados")
+                            .font(Theme.Typography.title3)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 25)
                         
                         ForEach(0..<3) { _ in
                             CourseCard()
@@ -68,10 +68,10 @@ struct FilterChip: View {
         .font(.system(size: 14, weight: .bold))
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(isSelected ? Theme.primary : Color.white)
-        .foregroundColor(isSelected ? .white : .black)
+        .background(isSelected ? Theme.primary : Theme.cardBackground)
+        .foregroundColor(.white)
         .cornerRadius(20)
-        .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 }
 
@@ -87,11 +87,12 @@ struct CourseCard: View {
                     Image(systemName: "star.fill")
                         .foregroundColor(.orange)
                     Text("4.8")
+                        .foregroundColor(.white)
                         .fontWeight(.bold)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Theme.pureWhite)
+                .background(Theme.cardBackground)
                 .cornerRadius(12)
                 .padding(12)
             }
@@ -99,7 +100,7 @@ struct CourseCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Pebble Beach Golf Links")
                     .font(Theme.Typography.body)
-                    .foregroundColor(Theme.deepBlack)
+                    .foregroundColor(.white)
                 
                 HStack {
                     Image(systemName: "mappin.and.ellipse")

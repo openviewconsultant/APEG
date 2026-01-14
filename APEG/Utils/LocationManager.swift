@@ -10,8 +10,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var heading: CLHeading?
     @Published var cityName: String = "Detectando..."
 
-    private let geocoder = CLGeocoder()
-
     override init() {
         super.init()
         locationManager.delegate = self
@@ -48,6 +46,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     private func reverseGeocode(location: CLLocation) {
+        let geocoder = CLGeocoder()
         geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
             guard let self = self else { return }
             
@@ -59,14 +58,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
                 return
             }
             
-            guard let placemark = placemarks?.first else {
-                DispatchQueue.main.async {
-                    self.cityName = "Ubicación Desconocida"
-                }
-                return
+            if let placemark = placemarks?.first {
+                self.processPlacemark(placemark)
             }
-            
-            self.processPlacemark(placemark)
         }
     }
     
