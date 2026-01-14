@@ -59,9 +59,13 @@ struct ActiveRoundView: View {
             HStack {
                 Button(action: { dismiss() }) {
                     Circle()
-                        .fill(Color.gray.opacity(0.1))
+                        .fill(Theme.cardBackground)
                         .frame(width: 40, height: 40)
-                        .overlay(Image(systemName: "xmark").foregroundColor(.primary))
+                        .overlay(
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                                .font(.system(size: 14, weight: .bold))
+                        )
                 }
                 Spacer()
                 VStack(spacing: 4) {
@@ -76,12 +80,13 @@ struct ActiveRoundView: View {
                             .shadow(color: .green.opacity(0.5), radius: 4)
                         Text("En Juego")
                             .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
                     }
                     
                     if !locationManager.isAuthorized {
                         Text("Activar GPS en Ajustes")
                             .font(.caption2)
-                            .foregroundColor(.red)
+                            .foregroundColor(Theme.primary)
                             .padding(.top, 2)
                     }
                 }
@@ -279,15 +284,19 @@ struct ActiveRoundView: View {
                                         .frame(width: 50, height: 58)
                                         .background(
                                             RoundedRectangle(cornerRadius: 14)
-                                                .fill(currentHole == hole ? Theme.primary : Theme.pureWhite)
+                                                .fill(currentHole == hole ? Theme.primary : Theme.cardBackground)
                                                 .shadow(
                                                     color: currentHole == hole ? Theme.primary.opacity(0.4) : Color.black.opacity(0.05),
                                                     radius: currentHole == hole ? 6 : 3,
                                                     x: 0,
                                                     y: currentHole == hole ? 3 : 2
                                                 )
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 14)
+                                                        .stroke(currentHole == hole ? Color.clear : Color.white.opacity(0.05), lineWidth: 1)
+                                                )
                                         )
-                                        .foregroundColor(currentHole == hole ? .white : .primary)
+                                        .foregroundColor(currentHole == hole ? .white : .white)
                                         .scaleEffect(currentHole == hole ? 1.05 : 1.0)
                                     }
                                 }

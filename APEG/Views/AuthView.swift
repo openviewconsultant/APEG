@@ -23,25 +23,13 @@ struct AuthView: View {
                 VStack(spacing: 40) {
                     // Branding
                     VStack(spacing: 20) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 160, height: 160)
-                                .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
-                            
-                            Image("apeg_logo")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 140, height: 140)
-                        }
-                        
                         Text(isRegistering ? "ÚNETE AL CLUB" : "BIENVENIDO AL CLUB")
-                            .font(.caption)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(.title2)
+                            .fontWeight(.black)
+                            .foregroundColor(.white)
                             .tracking(2)
                     }
-                    .padding(.top, 60)
+                    .padding(.top, 80)
                     
                     // Auth Box
                     VStack(spacing: 24) {
@@ -106,14 +94,14 @@ struct AuthView: View {
                                 } else {
                                     Text(isRegistering ? "Crear Cuenta" : "Iniciar Sesión")
                                         .font(.headline)
-                                        .foregroundColor(Theme.deepBlack)
+                                        .foregroundColor(.white)
                                 }
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(Theme.pureWhite)
+                            .background(Theme.primary)
                             .cornerRadius(16)
-                            .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 5)
+                            .shadow(color: Theme.primary.opacity(0.3), radius: 10, x: 0, y: 5)
                         }
                         .disabled(isLoading)
                         

@@ -33,7 +33,7 @@ struct PlayView: View {
                     }) {
                         HStack(spacing: 16) {
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.gray.opacity(0.1))
+                                .fill(Color.white.opacity(0.05))
                                 .frame(width: 70, height: 70)
                                 .overlay(Image(systemName: "flag.fill").foregroundColor(Theme.primary.opacity(0.5)))
                             
@@ -41,10 +41,11 @@ struct PlayView: View {
                                 Text(course.name)
                                     .font(.system(size: 16))
                                     .fontWeight(.bold)
+                                    .foregroundColor(.white)
                                     .lineLimit(1)
                                 Text(course.location)
                                     .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.white.opacity(0.6))
                                     .lineLimit(1)
                                 HStack {
                                     Label(course.distance, systemImage: "location.fill")
@@ -59,7 +60,7 @@ struct PlayView: View {
                                 }
                                 .font(.system(size: 12))
                                 .fontWeight(.medium)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white.opacity(0.5))
                             }
                         }
                         .padding(.vertical, 8) // Add internal vertical padding
@@ -69,10 +70,15 @@ struct PlayView: View {
                     .listRowSeparator(.hidden)
                     .listRowBackground(
                         RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white)
+                            .fill(Theme.cardBackground)
                             .padding(.vertical, 6)
                             .padding(.horizontal, 16)
-                            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 16)
+                            )
                     )
                 }
                 .listStyle(.plain)

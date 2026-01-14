@@ -63,6 +63,7 @@ struct ProductDetailView: View {
                                 
                                 Text(product.name)
                                     .font(.system(size: 32, weight: .bold))
+                                    .foregroundColor(.white)
                             }
                             
                             Spacer()
@@ -76,7 +77,7 @@ struct ProductDetailView: View {
                         
                         Text(product.description ?? "No hay descripción disponible para este producto.")
                             .font(.system(size: 16))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.7))
                             .lineSpacing(4)
                     }
                     .padding(.horizontal)
@@ -84,76 +85,90 @@ struct ProductDetailView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Detalles del Producto")
                             .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
                         
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Categoría")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.white.opacity(0.6))
                                 Text(product.category ?? "General")
                                     .font(.body)
+                                    .foregroundColor(.white)
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 4) {
                                 Text("Disponibilidad")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.white.opacity(0.6))
                                 Text("\(product.stockQuantity ?? 0) uds")
                                     .font(.body)
+                                    .foregroundColor(.white)
                             }
                         }
                     }
                     .padding(24)
-                    .background(Theme.pureWhite)
+                    .background(Theme.cardBackground)
                     .cornerRadius(32)
                     .padding(.horizontal)
-                    .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 32)
+                            .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                    )
                 }
                 .padding(.vertical)
             }
             
-            // Bottom Bar
-            HStack(spacing: 20) {
+            .background(Theme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom) {
                 HStack(spacing: 20) {
-                    Button(action: { if quantity > 1 { quantity -= 1 } }) { Image(systemName: "minus") }
-                    Text("\(quantity)")
-                        .font(.system(size: 18, weight: .bold))
-                        .frame(width: 30)
-                    Button(action: { quantity += 1 }) { Image(systemName: "plus") }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
-                .background(Color.black.opacity(0.05))
-                .cornerRadius(20)
-                
-                Button(action: {
-                    CartManager.shared.addToCart(product: product, quantity: quantity)
-                    withAnimation {
-                        showAddedToCart = true
+                    HStack(spacing: 20) {
+                        Button(action: { if quantity > 1 { quantity -= 1 } }) { Image(systemName: "minus") }
+                        Text("\(quantity)")
+                            .font(.system(size: 18, weight: .bold))
+                            .frame(width: 30)
+                        Button(action: { quantity += 1 }) { Image(systemName: "plus") }
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        withAnimation {
-                            showAddedToCart = false
-                        }
-                    }
-                }) {
-                    HStack {
-                        Text(showAddedToCart ? "¡Añadido!" : "Añadir al Carrito")
-                        Spacer()
-                        Text("$\(Int(product.price * Double(quantity)))")
-                    }
-                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 18)
-                    .background(showAddedToCart ? Color.green : Theme.primary)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .background(Theme.cardBackground)
                     .cornerRadius(20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+                    
+                    Button(action: {
+                        CartManager.shared.addToCart(product: product, quantity: quantity)
+                        withAnimation {
+                            showAddedToCart = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showAddedToCart = false
+                            }
+                        }
+                    }) {
+                        HStack {
+                            Text(showAddedToCart ? "¡Añadido!" : "Añadir")
+                            Spacer()
+                            Text("$\(Int(product.price * Double(quantity)))")
+                        }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Theme.deepBlack)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 18)
+                        .background(showAddedToCart ? Color.green : Theme.primary)
+                        .cornerRadius(20)
+                    }
                 }
+                .padding()
+                .background(Theme.background.opacity(0.9))
+                .padding(.bottom, 60) // Extra padding for tab bar
             }
-            .padding()
-            .background(Theme.pureWhite)
-            .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -5)
         }
+        .background(Theme.background.ignoresSafeArea())
         .edgesIgnoringSafeArea(.top)
         .navigationBarHidden(true)
     }

@@ -14,85 +14,170 @@ struct ShopView: View {
         GridItem(.flexible(), spacing: 16)
     ]
     
+    @State private var searchText = ""
+    @State private var selectedCategory = "Todos"
+    let categories = ["Todos", "Palos", "Ropa", "Accesorios", "Pelotas"]
+    
+    var filteredProducts: [Product] {
+        var result = products
+        
+        // Filter by category
+        if selectedCategory != "Todos" {
+            // Since we don't have a category field in Product yet, we'll simulate or just return all for now.
+            // In a real app, you'd filter: result = result.filter { $0.category == selectedCategory }
+        }
+        
+        // Filter by search text
+        if !searchText.isEmpty {
+            result = result.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        }
+        
+        return result
+    }
+    
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    HStack {
-                        Text("Tienda Pro")
-                            .font(Theme.Typography.largeTitle)
-                            .foregroundColor(.white)
-                        Spacer()
-                        
-                        if isPremium {
-                            Button(action: { showAddProduct = true }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundColor(Theme.primary)
-                            }
-                            .padding(.trailing, 8)
-                        }
-                        
-                        Button(action: { showCart = true }) {
-                            ZStack(alignment: .topTrailing) {
-                                Image(systemName: "cart")
-                                    .font(.title3)
+            ZStack {
+                Theme.background.ignoresSafeArea()
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 24) {
+                        // Header
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Tienda Pro")
+                                    .font(Theme.Typography.largeTitle)
                                     .foregroundColor(.white)
-                                    .padding(10)
-                                    .background(Theme.cardBackground)
-                                    .clipShape(Circle())
-                                    .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 2)
-                                
-                                if cartManager.itemCount > 0 {
-                                    Text("\(cartManager.itemCount)")
-                                        .font(.caption2.bold())
-                                        .foregroundColor(.white)
-                                        .frame(width: 18, height: 18)
-                                        .background(Color.red)
+                                Text("Equipamiento Premium")
+                                    .font(Theme.Typography.caption)
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .tracking(1)
+                            }
+                            
+                            Spacer()
+                            
+                            if isPremium {
+                                Button(action: { showAddProduct = true }) {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(Theme.deepBlack)
+                                        .padding(10)
+                                        .background(Theme.primary)
                                         .clipShape(Circle())
-                                        .offset(x: 4, y: -4)
+                                }
+                                .padding(.trailing, 8)
+                            }
+                            
+                            Button(action: { showCart = true }) {
+                                ZStack(alignment: .topTrailing) {
+                                    Image(systemName: "cart")
+                                        .font(.system(size: 20))
+                                        .foregroundColor(.white)
+                                        .padding(12)
+                                        .background(Theme.cardBackground)
+                                        .clipShape(Circle())
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                        )
+                                    
+                                    if cartManager.itemCount > 0 {
+                                        Text("\(cartManager.itemCount)")
+                                            .font(.caption2.bold())
+                                            .foregroundColor(.white)
+                                            .frame(width: 18, height: 18)
+                                            .background(Color.red)
+                                            .clipShape(Circle())
+                                            .offset(x: 4, y: -4)
+                                    }
                                 }
                             }
                         }
-                    }
-                    .padding(.horizontal, 25)
-                    
-                    if isLoading {
-                        ProductSkeletonGrid()
-                    } else if products.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "bag")
-                                .font(.system(size: 40))
-                                .foregroundColor(.gray)
-                            Text("No hay productos disponibles")
-                                .font(Theme.Typography.body)
-                                .foregroundColor(.secondary)
+                        .padding(.horizontal, 25)
+                        .padding(.top, 20)
+                        
+                        // Search Bar
+                        HStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.white.opacity(0.4))
+                            TextField("Buscar productos...", text: $searchText)
+                                .foregroundColor(.white)
+                                .accentColor(Theme.primary)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 40)
-                    } else {
-                        LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(products) { product in
-                                NavigationLink(destination: ProductDetailView(product: product)) {
-                                    ProductCard(
-                                        title: product.name,
-                                        price: product.price,
-                                        imageUrl: product.imageUrl,
-                                        brand: product.brand,
-                                        plusAction: {
-                                            CartManager.shared.addToCart(product: product)
+                        .padding(16)
+                        .background(Theme.cardBackground)
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 25)
+                        
+                        // Category Filters
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(categories, id: \.self) { category in
+                                    Button(action: {
+                                        withAnimation {
+                                            selectedCategory = category
                                         }
-                                    )
+                                    }) {
+                                        Text(category)
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(selectedCategory == category ? Theme.deepBlack : .white)
+                                            .padding(.horizontal, 20)
+                                            .padding(.vertical, 10)
+                                            .background(selectedCategory == category ? Theme.primary : Theme.cardBackground)
+                                            .cornerRadius(20)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .stroke(selectedCategory == category ? Theme.primary : Color.white.opacity(0.05), lineWidth: 1)
+                                            )
+                                    }
                                 }
-                                .buttonStyle(PlainButtonStyle())
                             }
+                            .padding(.horizontal, 25)
                         }
-                        .padding(.horizontal, 22)
+                        
+                        // Products Grid
+                        if isLoading {
+                            ProductSkeletonGrid()
+                        } else if filteredProducts.isEmpty {
+                            VStack(spacing: 16) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.white.opacity(0.2))
+                                Text("No se encontraron productos")
+                                    .font(Theme.Typography.body)
+                                    .foregroundColor(.white.opacity(0.5))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40)
+                        } else {
+                            LazyVGrid(columns: columns, spacing: 20) {
+                                ForEach(filteredProducts) { product in
+                                    NavigationLink(destination: ProductDetailView(product: product)) {
+                                        MarketingProductCard(
+                                            title: product.name,
+                                            price: product.price,
+                                            imageUrl: product.imageUrl,
+                                            brand: product.brand,
+                                            plusAction: {
+                                                CartManager.shared.addToCart(product: product)
+                                            }
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal, 22)
+                            .padding(.bottom, 100) // Space for tab bar
+                        }
                     }
                 }
-                .padding(.vertical)
             }
-            .background(Theme.background.ignoresSafeArea())
+            // Use .background here directly on the ZStack or outermost content, but ZStack already has background.
+            // .background(Theme.background.ignoresSafeArea()) <--- already in ZStack
             .sheet(isPresented: $showAddProduct) {
                 AddProductView().onDisappear {
                     loadProducts() // Refresh list when modal closes

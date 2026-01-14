@@ -8,6 +8,8 @@ struct GolfCourse: Identifiable, Hashable {
     let distance: String
     let rating: String
     let imageName: String
+    let description: String?
+    let subCourses: [String]?
     let latitude: Double
     let longitude: Double
     

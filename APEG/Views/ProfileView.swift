@@ -8,13 +8,14 @@ struct ProfileView: View {
     @State private var isLoading = true
     
     var body: some View {
-        ZStack {
-            Theme.background.ignoresSafeArea()
-            
-            ScrollView {
-                VStack(spacing: 32) {
-                    // Header / Profile Info
-                    if isLoading {
+        NavigationView {
+            ZStack {
+                Theme.background.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 32) {
+                        // Header / Profile Info
+                        if isLoading {
                         VStack(spacing: 16) {
                             Circle()
                                 .fill(Color.white.opacity(0.05))
@@ -69,15 +70,31 @@ struct ProfileView: View {
                     // Menu Sections
                     VStack(spacing: 30) {
                         ProfileMenuSection(title: "MI ACTIVIDAD") {
-                            ProfileMenuRow(icon: "figure.golf", title: "Estadísticas", color: Theme.secondary)
-                            ProfileMenuRow(icon: "trophy", title: "Mis Torneos", color: .orange)
-                            ProfileMenuRow(icon: "bag", title: "Mis Pedidos", color: Theme.primary)
+                            NavigationLink(destination: GameStatsView()) {
+                                ProfileMenuRowContent(icon: "figure.golf", title: "Estadísticas", color: Theme.secondary)
+                            }
+                            
+                            NavigationLink(destination: Text("Mis Torneos").font(.largeTitle)) {
+                                ProfileMenuRowContent(icon: "trophy", title: "Mis Torneos", color: .orange)
+                            }
+                            
+                            NavigationLink(destination: MyOrdersView()) {
+                                ProfileMenuRowContent(icon: "bag", title: "Mis Pedidos", color: Theme.primary)
+                            }
                         }
                         
                         ProfileMenuSection(title: "PREFERENCIAS") {
-                            ProfileMenuRow(icon: "person", title: "Datos Personales", color: .gray)
-                            ProfileMenuRow(icon: "creditcard", title: "Pagos", color: .purple)
-                            ProfileMenuRow(icon: "bell", title: "Notificaciones", color: .red)
+                            NavigationLink(destination: PersonalDataView()) {
+                                ProfileMenuRowContent(icon: "person", title: "Datos Personales", color: .gray)
+                            }
+                            
+                            NavigationLink(destination: Text("Métodos de Pago").font(.largeTitle)) {
+                                ProfileMenuRowContent(icon: "creditcard", title: "Pagos", color: .purple)
+                            }
+                            
+                            NavigationLink(destination: Text("Notificaciones").font(.largeTitle)) {
+                                ProfileMenuRowContent(icon: "bell", title: "Notificaciones", color: .red)
+                            }
                         }
                         
                         // Logout Button
@@ -102,6 +119,25 @@ struct ProfileView: View {
                     }
                 }
                 .padding(.bottom, 120)
+            }
+        }
+        .navigationBarHidden(true)
+        .onAppear {
+            loadProfile()
+        }
+        }
+    }
+    
+    private func loadProfile() {
+        SupabaseManager.shared.fetchProfile { result in
+            DispatchQueue.main.async {
+                self.isLoading = false
+                switch result {
+                case .success(let data):
+                    self.profile = data
+                case .failure(let error):
+                    print("Error loading profile: \(error)")
+                }
             }
         }
     }
@@ -171,35 +207,33 @@ struct ProfileMenuSection<Content: View>: View {
     }
 }
 
-struct ProfileMenuRow: View {
+struct ProfileMenuRowContent: View {
     let icon: String
     let title: String
     let color: Color
     
     var body: some View {
-        Button(action: {}) {
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(color.opacity(0.1))
-                        .frame(width: 40, height: 40)
-                    Image(systemName: icon)
-                        .foregroundColor(color)
-                        .font(.system(size: 16, weight: .bold))
-                }
-                
-                Text(title)
-                    .font(Theme.Typography.body)
-                    .foregroundColor(.white)
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white.opacity(0.2))
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.1))
+                    .frame(width: 40, height: 40)
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .font(.system(size: 16, weight: .bold))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            
+            Text(title)
+                .font(Theme.Typography.body)
+                .foregroundColor(.white)
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.white.opacity(0.2))
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 }

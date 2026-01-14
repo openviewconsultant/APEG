@@ -79,9 +79,11 @@ struct MainTabView: View {
                     .frame(width: 68, height: 68)
                     .shadow(color: Theme.primary.opacity(0.5), radius: 15, x: 0, y: 8)
                 
-                Image(systemName: "flag.fill")
-                    .font(.system(size: 28, weight: .black))
-                    .foregroundColor(.white)
+                Image("apeg_logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 45, height: 45)
+                    .clipShape(Circle())
             }
         }
     }

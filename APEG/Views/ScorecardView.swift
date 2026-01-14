@@ -21,7 +21,7 @@ struct ScorecardView: View {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
                             .font(.title3)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.white)
                     }
                     Spacer()
                     Text("Scorecard")
@@ -42,12 +42,13 @@ struct ScorecardView: View {
                         .fontWeight(.bold)
                     Text("Hoyo \(holes[currentHoleIndex].number) • Par \(holes[currentHoleIndex].par)")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.white.opacity(0.6))
                 }
             }
             .padding(.top, 20)
             .padding(.bottom, 24)
-            .background(Theme.pureWhite)
+            .background(Theme.cardBackground)
+            .cornerRadius(32, corners: [.bottomLeft, .bottomRight])
             
             // Hole Navigation
             ScrollView(.horizontal, showsIndicators: false) {
@@ -81,21 +82,27 @@ struct ScorecardView: View {
                 HStack(spacing: 40) {
                     Button(action: { updateScore(delta: -1) }) {
                         Circle()
-                            .fill(Color.white)
+                            .fill(Theme.cardBackground)
                             .frame(width: 64, height: 64)
-                            .shadow(color: .black.opacity(0.1), radius: 10)
-                            .overlay(Image(systemName: "minus").font(.title2).fontWeight(.bold))
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            )
+                            .overlay(Image(systemName: "minus").font(.title2).fontWeight(.bold).foregroundColor(.white))
                     }
                     
                     Button(action: { updateScore(delta: 1) }) {
                         Circle()
-                            .fill(Color.white)
+                            .fill(Theme.cardBackground)
                             .frame(width: 64, height: 64)
-                            .shadow(color: .black.opacity(0.1), radius: 10)
-                            .overlay(Image(systemName: "plus").font(.title2).fontWeight(.bold))
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            )
+                            .overlay(Image(systemName: "plus").font(.title2).fontWeight(.bold).foregroundColor(.white))
                     }
                 }
-                .foregroundColor(.primary)
+                .foregroundColor(.white)
             }
             .frame(maxHeight: .infinity)
             
@@ -106,7 +113,7 @@ struct ScorecardView: View {
                 StatView(label: "HOYOS", value: "\(playedHoles)/18")
             }
             .padding(24)
-            .background(Theme.pureWhite)
+            .background(Theme.cardBackground)
             .cornerRadius(32, corners: [.topLeft, .topRight])
             .shadow(color: .black.opacity(0.05), radius: 15)
         }
@@ -139,9 +146,10 @@ struct StatView: View {
         VStack(spacing: 4) {
             Text(label)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.6))
             Text(value)
                 .font(.system(size: 18, weight: .bold))
+                .foregroundColor(.white)
         }
         .frame(maxWidth: .infinity)
     }

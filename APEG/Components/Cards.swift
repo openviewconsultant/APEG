@@ -500,3 +500,117 @@ struct TournamentCard: View {
         .shadow(color: isFeatured ? Theme.primary.opacity(0.2) : .clear, radius: 15, x: 0, y: 8)
     }
 }
+
+// MARK: - Marketing Product Card
+struct MarketingProductCard: View {
+    let title: String
+    let price: Double
+    let imageUrl: String?
+    let brand: String?
+    var plusAction: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ZStack(alignment: .topTrailing) {
+                // Product Image
+                if let urlString = imageUrl, let url = URL(string: urlString) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(Color.white.opacity(0.05))
+                                .frame(height: 180)
+                                .overlay(ProgressView().tint(.white))
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 180)
+                                .clipped()
+                                .cornerRadius(24)
+                        case .failure(_):
+                            RoundedRectangle(cornerRadius: 24)
+                                .fill(Color.white.opacity(0.05))
+                                .frame(height: 180)
+                                .overlay(
+                                    Image(systemName: "photo")
+                                        .font(.largeTitle)
+                                        .foregroundColor(.white.opacity(0.3))
+                                )
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                } else {
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(Color.white.opacity(0.05))
+                        .frame(height: 180)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .font(.largeTitle)
+                                .foregroundColor(.white.opacity(0.3))
+                        )
+                }
+                
+                // Marketing Badge
+                Text("NUEVO")
+                    .font(.system(size: 8, weight: .black))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.white)
+                    .foregroundColor(Theme.deepBlack)
+                    .cornerRadius(8)
+                    .padding(12)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                if let b = brand {
+                    Text(b.uppercased())
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(Theme.primary)
+                        .tracking(1)
+                }
+                
+                Text(title)
+                    .font(Theme.Typography.headline)
+                    .foregroundColor(.white)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                
+                HStack {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Precio")
+                            .font(.caption2)
+                            .foregroundColor(.white.opacity(0.5))
+                        Text("$\(String(format: "%.0f", price))")
+                            .font(.title3)
+                            .fontWeight(.black)
+                            .foregroundColor(.white)
+                    }
+                    
+                    Spacer()
+                    
+                    Button(action: plusAction) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Theme.deepBlack)
+                            .padding(12)
+                            .background(Theme.primary)
+                            .clipShape(Circle())
+                            .shadow(color: Theme.primary.opacity(0.5), radius: 8, x: 0, y: 4)
+                    }
+                }
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 4)
+        }
+        .padding(12)
+        .background(Theme.cardBackground)
+        .cornerRadius(32)
+        .overlay(
+            RoundedRectangle(cornerRadius: 32)
+                .stroke(Color.white.opacity(0.05), lineWidth: 1)
+        )
+    }
+}

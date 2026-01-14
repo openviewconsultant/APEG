@@ -97,13 +97,6 @@ struct HomeView: View {
             
             Spacer()
             
-            Image("apeg_logo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 44, height: 44)
-            
-            Spacer()
-            
             Button(action: {}) {
                 Image(systemName: "bell")
                     .font(.system(size: 20, weight: .medium))
