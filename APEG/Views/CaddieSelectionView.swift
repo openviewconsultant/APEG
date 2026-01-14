@@ -132,10 +132,8 @@ struct CaddieSelectionView: View {
             .foregroundColor(Theme.primary)
         }
         .padding(16)
-        .background(Theme.cardBackground)
-        .cornerRadius(24)
+        .background(ModernCardBackground())
         .padding(.horizontal)
-        .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
     }
     
     private var filtersSection: some View {

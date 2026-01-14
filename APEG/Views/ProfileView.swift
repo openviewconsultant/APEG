@@ -209,12 +209,7 @@ struct ProfileStatItem: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(Color.white.opacity(0.05), lineWidth: 1)
-        )
+        .background(ModernCardBackground())
     }
 }
 
@@ -238,12 +233,7 @@ struct ProfileMenuSection<Content: View>: View {
             VStack(spacing: 0) {
                 content
             }
-            .background(Theme.cardBackground)
-            .cornerRadius(32)
-            .overlay(
-                RoundedRectangle(cornerRadius: 32)
-                    .stroke(Color.white.opacity(0.05), lineWidth: 1)
-            )
+            .background(ModernCardBackground())
             .padding(.horizontal, 20)
         }
     }

@@ -233,6 +233,7 @@ struct CaddieCard: View {
             }
             .foregroundColor(.white)
         }
+        .padding(16)
         .background(ModernCardBackground())
     }
     
@@ -277,13 +278,7 @@ struct CaddieCard: View {
             }
         }
         .padding(12)
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
 }
 
@@ -296,9 +291,9 @@ struct ModernCardBackground: View {
             .fill(Theme.cardBackground)
             .overlay(
                 RoundedRectangle(cornerRadius: 32)
-                    .stroke(Theme.vibrantGreen.opacity(0.3), lineWidth: 1.5)
+                    .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
             )
-            .shadow(color: Theme.Shadows.floating.color, radius: Theme.Shadows.floating.radius, x: Theme.Shadows.floating.x, y: Theme.Shadows.floating.y)
+            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -395,13 +390,7 @@ struct ProductCard: View {
             .padding(.horizontal, 4)
         }
         .padding(12)
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
 }
 
@@ -574,13 +563,7 @@ struct MarketingProductCard: View {
             .padding(.horizontal, 4)
         }
         .padding(12)
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
 }
 
@@ -661,12 +644,24 @@ struct GolfCourseCard: View {
             }
             .padding(16)
         }
-        .background(Theme.cardBackground)
-        .cornerRadius(32)
-        .overlay(
-            RoundedRectangle(cornerRadius: 32)
-                .stroke(Theme.softGreenBorder.opacity(0.1), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .background(ModernCardBackground())
     }
+}
+
+
+
+#Preview {
+    VStack(spacing: 20) {
+        PlayActionCard(temperature: "24°C", condition: "Soleado", symbol: "sun.max.fill", locationName: "Pebble Beach", action: {})
+        
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 16) {
+                QuickActionCard(title: "Reservar", icon: "calendar", color: .purple, action: {})
+                QuickActionCard(title: "Torneos", icon: "trophy", color: .orange, action: {})
+                QuickActionCard(title: "Tienda", icon: "bag", color: .cyan, action: {})
+            }
+            .padding()
+        }
+    }
+    .background(Color.black)
 }

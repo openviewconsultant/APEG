@@ -146,6 +146,7 @@ struct AuthView: View {
                         }
                     }
                     .padding(30)
+                    .background(ModernCardBackground())
                     .padding(.horizontal, 20)
                     
                     // Bottom Spacer
