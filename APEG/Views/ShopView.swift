@@ -37,9 +37,9 @@ struct ShopView: View {
                             ZStack(alignment: .topTrailing) {
                                 Image(systemName: "cart")
                                     .font(.title3)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(Theme.deepBlack)
                                     .padding(10)
-                                    .background(Color.white)
+                                    .background(Theme.pureWhite)
                                     .clipShape(Circle())
                                     .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                                 
@@ -92,7 +92,7 @@ struct ShopView: View {
                 }
                 .padding(.vertical)
             }
-            .background(Color(hex: "F8F9FA").ignoresSafeArea())
+            .background(Theme.background.ignoresSafeArea())
             .sheet(isPresented: $showAddProduct) {
                 AddProductView().onDisappear {
                     loadProducts() // Refresh list when modal closes

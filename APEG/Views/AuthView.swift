@@ -104,12 +104,12 @@ struct AuthView: View {
                                 } else {
                                     Text(isRegistering ? "Crear Cuenta" : "Iniciar Sesión")
                                         .font(.headline)
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Theme.deepBlack)
                                 }
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(Color.white)
+                            .background(Theme.pureWhite)
                             .cornerRadius(16)
                             .shadow(color: .white.opacity(0.2), radius: 10, x: 0, y: 5)
                         }

@@ -130,7 +130,7 @@ struct ProfileView: View {
                 }
                 .padding(.bottom, 120) // Space for tab bar
             }
-            .background(Color(hex: "F8F9FA").ignoresSafeArea())
+            .background(Theme.background.ignoresSafeArea())
             .navigationBarHidden(true)
             .onAppear {
                 checkProfile()
@@ -207,7 +207,7 @@ struct ProfileMenuSection<Content: View>: View {
             VStack(spacing: 0) {
                 content
             }
-            .background(Color.white)
+            .background(Theme.pureWhite)
             .cornerRadius(24)
             .padding(.horizontal, 25)
             .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)

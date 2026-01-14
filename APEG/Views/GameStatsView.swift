@@ -19,9 +19,9 @@ struct GameStatsView: View {
                     }) {
                         Image(systemName: "arrow.left")
                             .font(.title3)
-                            .foregroundColor(.black)
+                            .foregroundColor(Theme.deepBlack)
                             .padding(12)
-                            .background(Color.white)
+                            .background(Theme.pureWhite)
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                     }
@@ -36,7 +36,7 @@ struct GameStatsView: View {
                         .font(.title3)
                         .foregroundColor(Theme.primary)
                         .padding(12)
-                        .background(Color.white)
+                        .background(Theme.pureWhite)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                 }
@@ -200,7 +200,7 @@ struct ModernStatCard: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
     }
@@ -218,7 +218,7 @@ struct EmptyChartPlaceholder: View {
         }
         .frame(height: 150)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(20)
         .padding(.horizontal)
         .shadow(color: .black.opacity(0.03), radius: 5)
@@ -272,7 +272,7 @@ struct ScoreTrendChart: View {
         }
         .frame(height: 180)
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
         .padding(.horizontal)
@@ -310,7 +310,7 @@ struct SkillRadarChart: View {
         }
         .frame(height: 260)
         .frame(maxWidth: .infinity)
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(24)
         .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 4)
         .padding(.horizontal)
@@ -362,7 +362,7 @@ struct ModernRoundRow: View {
                 .clipShape(Circle())
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.04), radius: 8, x: 0, y: 3)
         .padding(.horizontal)

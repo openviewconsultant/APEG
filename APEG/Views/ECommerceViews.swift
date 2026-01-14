@@ -67,7 +67,7 @@ struct CartView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 30)
                     }
-                    .background(Color.white)
+                    .background(Theme.pureWhite)
                     .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -5)
                 }
             }
@@ -135,7 +135,7 @@ struct CartItemRow: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.02), radius: 5, x: 0, y: 2)
     }
@@ -205,7 +205,7 @@ struct CheckoutView: View {
                     }
                 }
                 .padding()
-                .background(Color.white)
+                .background(Theme.pureWhite)
                 .cornerRadius(20)
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
                 
@@ -335,7 +335,7 @@ struct MyOrdersView: View {
         }
         .navigationTitle("Mis Pedidos")
         .navigationBarTitleDisplayMode(.inline)
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
         .onAppear(perform: loadOrders)
     }
     
@@ -387,7 +387,7 @@ struct OrderRow: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(20)
         .shadow(color: .black.opacity(0.04), radius: 10, x: 0, y: 5)
     }

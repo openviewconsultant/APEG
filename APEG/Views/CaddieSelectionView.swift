@@ -78,14 +78,14 @@ struct CaddieSelectionView: View {
                 .padding(.vertical)
             }
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
     }
     
     private var header: some View {
         HStack {
             Button(action: {}) {
                 Image(systemName: "arrow.left")
-                    .foregroundColor(.black)
+                    .foregroundColor(Theme.deepBlack)
                     .font(.title2)
             }
             
@@ -99,12 +99,12 @@ struct CaddieSelectionView: View {
             
             Button(action: {}) {
                 Image(systemName: "calendar")
-                    .foregroundColor(.black)
+                    .foregroundColor(Theme.deepBlack)
                     .font(.title2)
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
     }
     
     private var locationSummary: some View {
@@ -132,7 +132,7 @@ struct CaddieSelectionView: View {
             .foregroundColor(Theme.primary)
         }
         .padding(16)
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(24)
         .padding(.horizontal)
         .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)

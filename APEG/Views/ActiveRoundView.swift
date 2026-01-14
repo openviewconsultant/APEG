@@ -103,7 +103,7 @@ struct ActiveRoundView: View {
             }
             .padding(.horizontal, 25)
             .padding(.vertical, 16)
-            .background(Color.white)
+            .background(Theme.pureWhite)
             .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 5)
             .zIndex(10)
             
@@ -201,7 +201,7 @@ struct ActiveRoundView: View {
                         
                         ZStack {
                             RoundedRectangle(cornerRadius: 28)
-                                .fill(Color.white)
+                                .fill(Theme.pureWhite)
                                 .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
                             
                             HStack(spacing: 0) {
@@ -279,7 +279,7 @@ struct ActiveRoundView: View {
                                         .frame(width: 50, height: 58)
                                         .background(
                                             RoundedRectangle(cornerRadius: 14)
-                                                .fill(currentHole == hole ? Theme.primary : Color.white)
+                                                .fill(currentHole == hole ? Theme.primary : Theme.pureWhite)
                                                 .shadow(
                                                     color: currentHole == hole ? Theme.primary.opacity(0.4) : Color.black.opacity(0.05),
                                                     radius: currentHole == hole ? 6 : 3,
@@ -300,7 +300,7 @@ struct ActiveRoundView: View {
                 .padding(.vertical, 20)
             }
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
         .alert(isPresented: $showAlert) {
             Alert(
                 title: Text(alertTitle),

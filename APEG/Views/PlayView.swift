@@ -77,7 +77,7 @@ struct PlayView: View {
                 }
                 .listStyle(.plain)
             }
-            .background(Color(hex: "F8F9FA").ignoresSafeArea())
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Seleccionar Campo")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Club, ciudad o cercanía")

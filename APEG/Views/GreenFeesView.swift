@@ -51,7 +51,7 @@ struct GreenFeesView: View {
             .padding(.vertical, 10)
             .padding(.bottom, 120)
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
     }
 }
 
@@ -91,7 +91,7 @@ struct CourseCard: View {
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(Color.white)
+                .background(Theme.pureWhite)
                 .cornerRadius(12)
                 .padding(12)
             }

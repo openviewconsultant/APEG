@@ -18,9 +18,9 @@ struct TournamentsView: View {
                         Button(action: {}) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
+                                .foregroundColor(Theme.deepBlack)
                                 .padding(12)
-                                .background(Color.white)
+                                .background(Theme.pureWhite)
                                 .clipShape(Circle())
                                 .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 5)
                         }
@@ -183,7 +183,7 @@ struct TournamentsView: View {
                     }
                     .padding(24)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white)
+                    .background(Theme.pureWhite)
                     .cornerRadius(32)
                     .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
                 }
@@ -191,7 +191,7 @@ struct TournamentsView: View {
             }
             .padding(.vertical)
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
     }
 }
 

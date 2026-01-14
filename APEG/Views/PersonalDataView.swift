@@ -16,7 +16,7 @@ struct PersonalDataView: View {
     
     var body: some View {
         ZStack {
-            Color(hex: "F8F9FA").ignoresSafeArea()
+            Theme.background.ignoresSafeArea()
             
             if isLoading {
                 ProgressView()
@@ -108,7 +108,7 @@ struct PersonalDataView: View {
                                             .cornerRadius(8)
                                     }
                                     .padding()
-                                    .background(Color.white)
+                                    .background(Theme.pureWhite)
                                     .cornerRadius(16)
                                     .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
                                 }
@@ -135,7 +135,7 @@ struct PersonalDataView: View {
                                         .foregroundColor(.red)
                                         .frame(maxWidth: .infinity)
                                         .padding()
-                                        .background(Color.white)
+                                        .background(Theme.pureWhite)
                                         .cornerRadius(12)
                                         .shadow(color: .black.opacity(0.05), radius: 5)
                                 }
@@ -282,7 +282,7 @@ struct DataRow: View {
             Spacer()
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 3)
     }
@@ -322,7 +322,7 @@ struct EditableDataRow: View {
             Spacer()
         }
         .padding()
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 3)
     }

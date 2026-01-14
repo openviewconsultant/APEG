@@ -104,7 +104,7 @@ struct ProductDetailView: View {
                         }
                     }
                     .padding(24)
-                    .background(Color.white)
+                    .background(Theme.pureWhite)
                     .cornerRadius(32)
                     .padding(.horizontal)
                     .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
@@ -151,7 +151,7 @@ struct ProductDetailView: View {
                 }
             }
             .padding()
-            .background(Color.white)
+            .background(Theme.pureWhite)
             .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: -5)
         }
         .edgesIgnoringSafeArea(.top)

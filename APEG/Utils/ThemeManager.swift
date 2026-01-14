@@ -1,13 +1,36 @@
 import SwiftUI
+import UIKit
 
 struct Theme {
     static let primary = Color(hex: "4CAF50") // Vibrant Golf Green
     static let primaryLight = Color(hex: "C8E6C9")
     static let secondary = Color(hex: "2E7D32") // Deep Moss Green
     static let accent = Color(hex: "FFC107") // Gold for ratings
-    static let background = Color(hex: "F8F9FA")
-    static let deepBlack = Color(hex: "121212")
-    static let pureWhite = Color(hex: "FFFFFF")
+    
+    // Dynamic Colors
+    static var background: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor(hex: "121212") : UIColor(hex: "F8F9FA")
+        })
+    }
+    
+    static var deepBlack: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? .white : UIColor(hex: "121212")
+        })
+    }
+    
+    static var pureWhite: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor(hex: "1C1C1E") : .white
+        })
+    }
+    
+    static var cardBackground: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor(white: 1.0, alpha: 0.05) : .white
+        })
+    }
     
     struct Shadows {
         static let soft = ShadowConfig(color: .black.opacity(0.08), radius: 15, x: 0, y: 8)
@@ -57,6 +80,32 @@ extension Color {
             green: Double(g) / 255,
             blue:  Double(b) / 255,
             opacity: Double(a) / 255
+        )
+    }
+}
+
+extension UIColor {
+    convenience init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            red: CGFloat(r) / 255,
+            green: CGFloat(g) / 255,
+            blue: CGFloat(b) / 255,
+            alpha: CGFloat(a) / 255
         )
     }
 }

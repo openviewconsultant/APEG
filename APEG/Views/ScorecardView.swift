@@ -47,7 +47,7 @@ struct ScorecardView: View {
             }
             .padding(.top, 20)
             .padding(.bottom, 24)
-            .background(Color.white)
+            .background(Theme.pureWhite)
             
             // Hole Navigation
             ScrollView(.horizontal, showsIndicators: false) {
@@ -106,11 +106,11 @@ struct ScorecardView: View {
                 StatView(label: "HOYOS", value: "\(playedHoles)/18")
             }
             .padding(24)
-            .background(Color.white)
+            .background(Theme.pureWhite)
             .cornerRadius(32, corners: [.topLeft, .topRight])
             .shadow(color: .black.opacity(0.05), radius: 15)
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
     }
     
     private var totalScore: Int {

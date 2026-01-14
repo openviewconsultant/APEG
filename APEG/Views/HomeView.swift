@@ -64,7 +64,7 @@ struct HomeView: View {
             }
             .padding(.vertical, 10)
         }
-        .background(Color(hex: "F8F9FA").ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
         .fullScreenCover(isPresented: $showPlayView) {
             PlayView()
         }
@@ -122,9 +122,9 @@ struct HomeView: View {
                 Button(action: {}) {
                     Image(systemName: "bell.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.black)
+                        .foregroundColor(Theme.deepBlack)
                         .padding(14)
-                        .background(Color.white)
+                        .background(Theme.pureWhite)
                         .clipShape(Circle())
                         .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
                 }

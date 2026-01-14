@@ -6,7 +6,7 @@ struct ModernCardBackground: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 35)
-                .fill(Color.white)
+                .fill(Theme.cardBackground)
                 .overlay(
                     ZStack {
                         // Blobs de colores pastel difuminados (Refined for general use)
@@ -47,7 +47,7 @@ struct ProductCard: View {
         VStack(alignment: .leading, spacing: 12) {
             ZStack(alignment: .topTrailing) {
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.white)
+                    .fill(Theme.pureWhite)
                     .frame(height: 170)
                     .overlay(
                         GeometryReader { geo in
@@ -95,7 +95,7 @@ struct ProductCard: View {
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.white)
                             .padding(10)
-                            .background(Circle().fill(Color.black))
+                            .background(Circle().fill(Theme.deepBlack))
                     }
                     .padding(12)
                     .buttonStyle(PlainButtonStyle())
@@ -174,7 +174,7 @@ struct CaddieCard: View {
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.white)
+                .background(Theme.pureWhite)
                 .cornerRadius(10)
                 .padding(8)
             }
@@ -201,7 +201,7 @@ struct CaddieCard: View {
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.white)
                             .padding(8)
-                            .background(Color.black)
+                            .background(Theme.deepBlack)
                             .clipShape(Circle())
                     }
                 }
@@ -251,7 +251,7 @@ struct CaddieCard: View {
             .cornerRadius(12)
         }
         .padding(16)
-        .background(Color.white)
+        .background(Theme.pureWhite)
         .cornerRadius(24)
         .shadow(color: Theme.Shadows.soft.color, radius: Theme.Shadows.soft.radius, x: Theme.Shadows.soft.x, y: Theme.Shadows.soft.y)
     }
@@ -335,7 +335,7 @@ struct TournamentCard: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)
-                        .background(Color.black)
+                        .background(Theme.deepBlack)
                         .cornerRadius(25)
                     }
                 }
@@ -514,7 +514,7 @@ struct QuickActionCard: View {
             VStack(spacing: 16) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 32)
-                        .fill(Color.white)
+                        .fill(Theme.pureWhite)
                         .frame(width: 95, height: 95)
                         .shadow(color: .black.opacity(0.04), radius: 15, x: 0, y: 8)
                     
